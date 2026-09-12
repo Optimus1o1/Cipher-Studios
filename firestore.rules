@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. Leads collection: Public create-only, strictly admin read & write
+    match /leads/{leadId} {
+      allow create: if request.resource.data.keys().hasAll(['fullName', 'email', 'message'])
+                    && request.resource.data.fullName is string
+                    && request.resource.data.email is string
+                    && request.resource.data.fullName.size() >= 2
+                    && request.resource.data.message.size() >= 10;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 2. Users collection: User can only read and write their own profile
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // 3. Portfolio & Testimonials: Public read, admin-only mutation
+    match /portfolio/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. Default deny-all catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
