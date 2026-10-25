@@ -35,10 +35,10 @@ function SatelliteMoonMesh({
   const { camera } = useThree();
   const currentPos = useRef({ x: 0, y: 0, scale: 1 });
 
-  // Load authentic 2K NASA SVS CGI Moon Kit textures (NASA SVS 4720, Public Domain)
+  // Load authentic 2K photorealistic cubic projection textures
   const [diffuseMap, bumpMap] = useLoader(THREE.TextureLoader, [
-    '/textures/moon/lroc_color_2k.jpg',
-    '/textures/moon/ldem_3_8bit.jpg',
+    '/textures/moon/Diffuse_2K.jpg',
+    '/textures/moon/Bump_2K.jpg',
   ]);
 
   useMemo(() => {
@@ -136,9 +136,9 @@ function SatelliteMoonMesh({
         <meshStandardMaterial
           map={diffuseMap}
           bumpMap={bumpMap}
-          bumpScale={0.12}
-          roughness={0.92}
-          metalness={0.01}
+          bumpScale={0.065}
+          roughness={0.93}
+          metalness={0.02}
         />
       </mesh>
     </group>
