@@ -1,38 +1,21 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import {
-  Monitor,
-  Code2,
-  Search,
-  Megaphone,
-  PenTool,
-  ShieldCheck,
-  ChevronRight,
-} from 'lucide-react';
 import { SATELLITE_CONFIGS, SatelliteConfig } from '@/components/three/satellites/types';
-import { orbitalCoordsBridge, SatelliteScreenCoord } from '@/lib/orbitalCoords';
+import { orbitalCoordsBridge } from '@/lib/orbitalCoords';
 import { useOrbital } from '@/context/OrbitalContext';
+import { servicesData } from '@/data/services';
 import { cn } from '@/lib/utils';
 
-// Lucide icon mapping
-const ICON_MAP: Record<SatelliteConfig['iconType'], React.ElementType> = {
-  design: Monitor,
-  dev: Code2,
-  seo: Search,
-  marketing: Megaphone,
-  branding: PenTool,
-  care: ShieldCheck,
-};
+// Lookup map for exact text from services.ts
+const SERVICES_MAP = new Map(servicesData.map((s) => [s.slug, s]));
 
 interface FloatingServiceLabelsProps {
   heroRef?: React.RefObject<HTMLElement | null>;
 }
 
 export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
-  const router = useRouter();
   const { hoveredSlug, setHoveredSlug, selectedSlug, isServicesRoute, selectService } = useOrbital();
   const labelRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
@@ -53,7 +36,6 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
       if (typeof window === 'undefined') return;
       if (heroRef?.current) {
         const rect = heroRef.current.getBoundingClientRect();
-        // Visible if hero occupies meaningful vertical space on screen
         isHeroVisibleRef.current = rect.bottom > 140 && rect.top < window.innerHeight - 100;
       } else {
         isHeroVisibleRef.current = window.scrollY < 450;
@@ -92,6 +74,7 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
         height: number;
         isVisible: boolean;
         side: 'left' | 'right';
+        panelPos: 'beside' | 'below';
       }
 
       const candidates: LabelCandidate[] = [];
@@ -102,14 +85,15 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
 
         if (!data || !el) continue;
 
-        const w = el.offsetWidth || 230;
-        const h = el.offsetHeight || 68;
+        // Label dimensions (compact text only)
+        const w = el.offsetWidth || 160;
+        const h = el.offsetHeight || 24;
 
         const xSat = data.screenX;
         const ySat = data.screenY;
         const dxMoon = xSat - data.moonScreenX;
 
-        // Position 28px away from satellite center along the Moon ray
+        // Position 28px away from satellite on the side facing away from the Moon
         let targetLeft: number;
         let side: 'left' | 'right';
 
@@ -140,6 +124,14 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
         const maxTop = viewportHeight - h - 16;
         targetTop = Math.max(minTop, Math.min(maxTop, targetTop));
 
+        // Determine compact panel position (beside if space allows, otherwise below)
+        const panelWidth = 260;
+        const hasSpaceBeside =
+          side === 'right'
+            ? targetLeft + w + panelWidth + 16 < viewportWidth
+            : targetLeft - panelWidth - 16 > 0;
+        const panelPos: 'beside' | 'below' = hasSpaceBeside ? 'beside' : 'below';
+
         // Visibility rules:
         // Hide when within 40px of any viewport edge or behind the Moon
         const edgeOccluded =
@@ -150,7 +142,7 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
 
         let isVisible = !edgeOccluded && !data.behindMoon && isHeroVisible;
 
-        // Responsive Filter: Below 900px width, show only the active/hovered satellite label
+        // Responsive Filter: Below 900px width, show only the active/targeted satellite label
         if (isNarrow) {
           const isTargeted =
             hoveredSlug === config.slug || selectedSlug === config.slug;
@@ -171,6 +163,7 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
           height: h,
           isVisible,
           side,
+          panelPos,
         });
       }
 
@@ -218,14 +211,15 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
         // Opacity transition (300ms defined in CSS)
         el.style.opacity = item.isVisible ? '1' : '0';
         el.style.pointerEvents = item.isVisible ? 'auto' : 'none';
-        
+
         // Tab order strictly follows visual order
         const assignedTab = item.isVisible ? String(visualOrderMap.get(item.slug) || 1) : '-1';
         el.setAttribute('tabindex', assignedTab);
         el.setAttribute('aria-hidden', item.isVisible ? 'false' : 'true');
 
-        // Dynamic side indicator attribute for connector styling
+        // Dynamic side indicator attribute for connector styling and panel orientation
         el.setAttribute('data-anchor-side', item.side);
+        el.setAttribute('data-panel-pos', item.panelPos);
       }
     });
 
@@ -257,8 +251,56 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
       className="fixed inset-0 pointer-events-none z-20 overflow-hidden"
       aria-label="Orbital Service Instruments Fleet"
     >
+      {/* Component-scoped connector line and compact panel positioning rules */}
+      <style jsx>{`
+        [data-anchor-side='right'] .satellite-connector-line {
+          left: -28px;
+          right: auto;
+        }
+        [data-anchor-side='left'] .satellite-connector-line {
+          right: -28px;
+          left: auto;
+        }
+        [data-anchor-side='right'][data-panel-pos='beside'] .service-description-panel {
+          left: calc(100% + 12px);
+          right: auto;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        [data-anchor-side='left'][data-panel-pos='beside'] .service-description-panel {
+          right: calc(100% + 12px);
+          left: auto;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        [data-anchor-side='right'][data-panel-pos='below'] .service-description-panel {
+          left: 0;
+          right: auto;
+          top: calc(100% + 6px);
+          transform: none;
+        }
+        [data-anchor-side='left'][data-panel-pos='below'] .service-description-panel {
+          right: 0;
+          left: auto;
+          top: calc(100% + 6px);
+          transform: none;
+        }
+        :global([data-floating-label]):hover .service-description-panel,
+        :global([data-floating-label]:focus-visible) .service-description-panel,
+        :global([data-floating-label].is-canvas-hovered) .service-description-panel {
+          opacity: 1 !important;
+        }
+        :global([data-floating-label]):hover > span:not(.satellite-connector-line),
+        :global([data-floating-label]:focus-visible) > span:not(.satellite-connector-line),
+        :global([data-floating-label].is-canvas-hovered) > span:not(.satellite-connector-line) {
+          color: #ffffff !important;
+        }
+      `}</style>
+
       {SATELLITE_CONFIGS.map((config) => {
-        const Icon = ICON_MAP[config.iconType];
+        const service = SERVICES_MAP.get(config.slug);
+        const title = service?.title || config.title;
+        const intro = service?.intro || config.description;
 
         return (
           <Link
@@ -269,7 +311,7 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
             }}
             data-floating-label={config.slug}
             data-service-label={config.slug}
-            aria-label={config.title}
+            aria-label={title}
             onClick={(e) => {
               if (!isReadyRef.current) {
                 e.preventDefault();
@@ -290,62 +332,56 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
             onFocus={() => setHoveredSlug(config.slug)}
             onBlur={() => setHoveredSlug(null)}
             className={cn(
-              'absolute top-0 left-0 w-max max-w-[245px] sm:max-w-[265px]',
-              'rounded-[14px] px-3.5 py-2.5',
-              'bg-[#05060d]/60 backdrop-blur-md border border-white/10',
+              'absolute top-0 left-0 w-max',
               'transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
-              'transition-[background-color,border-color,box-shadow] duration-200 ease-out',
               'opacity-0 pointer-events-none select-none',
               'group cursor-pointer',
-              'hover:bg-[#0f121e]/85 hover:border-[#e0a45c]/30',
-              'hover:shadow-[0_0_12px_rgba(224,164,92,0.20),inset_0_0_0_1px_rgba(224,164,92,0.20)]',
-              '[&.is-canvas-hovered]:bg-[#0f121e]/85 [&.is-canvas-hovered]:border-[#e0a45c]/30',
-              '[&.is-canvas-hovered]:shadow-[0_0_12px_rgba(224,164,92,0.20),inset_0_0_0_1px_rgba(224,164,92,0.20)]',
-              'focus:outline-none focus-visible:ring-1 focus-visible:ring-[#e0a45c] focus-visible:border-[#e0a45c]'
+              'focus:outline-none focus-visible:ring-1 focus-visible:ring-[#e0a45c] focus-visible:ring-offset-2 focus-visible:ring-offset-black/60 rounded-sm'
             )}
             style={{
               willChange: 'transform, opacity',
             }}
           >
-            {/* Header: Icon + Number + Status Dot */}
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <div className="flex items-center gap-1.5">
-                <span
-                  className="p-1 rounded-md border border-white/10 bg-white/5 text-mute group-hover:text-white transition-colors"
-                  style={{ borderColor: `${config.accentColor}40` }}
-                >
-                  <Icon className="size-3.5" style={{ color: config.accentColor }} />
-                </span>
-                <span className="font-mono text-[10px] tracking-widest uppercase text-mute/80 group-hover:text-mute">
-                  {config.number}
-                </span>
-              </div>
-              <span
-                className="w-1.5 h-1.5 rounded-full shrink-0 group-hover:animate-ping"
-                style={{ background: config.accentColor }}
-                aria-hidden="true"
-              />
-            </div>
-
-            {/* Title */}
-            <h3
-              className="font-mono text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-[#F2EFE8] group-hover:text-white truncate transition-colors"
+            {/* 1px Connector Line linking label to satellite anchor across the 28px offset */}
+            <span
+              className="satellite-connector-line absolute top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
               style={{
-                color: hoveredSlug === config.slug ? config.accentColor : undefined,
+                width: '28px',
+                height: '1px',
+                backgroundColor: config.accentColor,
+                opacity: 0.85,
+              }}
+              aria-hidden="true"
+            />
+
+            {/* Service Name: Small uppercase monospace, 0.12em tracking, #ECEEF4 at 85% opacity, soft text shadow */}
+            <span
+              className="block font-mono text-[11px] sm:text-[12px] uppercase tracking-[0.12em] text-[#ECEEF4]/85 transition-colors duration-200 group-hover:text-white group-focus-visible:text-white [&.is-canvas-hovered]:text-white"
+              style={{
+                textShadow: '0 1px 4px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 0, 0, 0.70)',
               }}
             >
-              {config.title}
-            </h3>
+              {title}
+            </span>
 
-            {/* Tagline */}
-            <p className="text-[11px] text-[#8B9099] leading-tight line-clamp-1 mt-0.5 group-hover:text-white/80 transition-colors">
-              {config.tagline}
-            </p>
-
-            {/* Quick Inspect Arrow */}
-            <div className="mt-1 flex items-center justify-between text-[9px] font-mono text-[#e0a45c]/80 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-              <span>Inspect</span>
-              <ChevronRight className="size-3 text-[#e0a45c]" />
+            {/* Compact Description Panel (Revealed on hover or keyboard focus, 200ms fade-in, no scale change) */}
+            <div
+              className="service-description-panel absolute z-30 pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-[.is-canvas-hovered]:opacity-100 transition-opacity duration-200 ease-out"
+              style={{
+                backgroundColor: 'rgba(5, 6, 13, 0.6)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.10)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                width: 'max-content',
+                maxWidth: '260px',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.15)',
+              }}
+            >
+              <p className="text-[11px] leading-snug text-[#8B9099] font-sans">
+                {intro}
+              </p>
             </div>
           </Link>
         );
