@@ -20,16 +20,48 @@ export default function ServicesPage() {
   return (
     <div className="w-full pt-28 pb-20 pointer-events-none">
       {/* Services Header */}
-      <div className="max-w-content mx-auto px-6 md:px-8 pt-10 pb-6 text-center pointer-events-none select-none">
-        <span className="text-accent text-[0.95rem] font-medium tracking-wide uppercase inline-block">
-          Studio Capabilities
-        </span>
-        <h1 className="font-serif font-light text-ink text-[2.8rem] md:text-[4.6rem] leading-[1.06] tracking-[-0.025em] max-w-[16ch] mx-auto mt-4 mb-6">
-          Six services, one team, one standard.
-        </h1>
-        <p className="text-mute text-[1.12rem] md:text-[1.2rem] leading-relaxed max-w-[54ch] mx-auto">
-          Choose an individual service or commission an end-to-end launch. Six bespoke capabilities orbiting our central mission to help your business grow.
-        </p>
+      <div className="relative max-w-content mx-auto px-6 md:px-8 pt-10 pb-6 text-center pointer-events-none select-none">
+        {/* Soft scrim behind hero text block only (eyebrow, headline, subtitle, hint) */}
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none z-0"
+          style={{
+            top: '-50px',
+            bottom: '-10px',
+            left: 'calc(50% - min(510px, 48vw))',
+            right: 'calc(50% - min(510px, 48vw))',
+            background:
+              'radial-gradient(ellipse at center, rgba(5, 6, 13, 0.88) 0%, rgba(5, 6, 13, 0.75) 55%, rgba(5, 6, 13, 0.38) 80%, rgba(5, 6, 13, 0) 100%)',
+          }}
+        />
+        <div className="relative z-10">
+          <span
+            id="hero-eyebrow"
+            className="text-[0.95rem] font-medium tracking-wide uppercase inline-block"
+            style={{
+              color: '#FDE2BD',
+              textShadow: '0 1px 12px rgba(5, 6, 13, 0.8)',
+            }}
+          >
+            Studio Capabilities
+          </span>
+          <h1
+            id="hero-headline"
+            className="font-serif font-light text-ink text-[2.8rem] md:text-[4.6rem] leading-[1.06] tracking-[-0.025em] max-w-[16ch] mx-auto mt-4 mb-6"
+          >
+            Six services, one team, one standard.
+          </h1>
+          <p
+            id="hero-subtitle"
+            className="text-[1.12rem] md:text-[1.2rem] leading-relaxed max-w-[54ch] mx-auto"
+            style={{
+              color: '#C9CEDC',
+              textShadow: '0 1px 12px rgba(5, 6, 13, 0.8)',
+            }}
+          >
+            Choose an individual service or commission an end-to-end launch. Six bespoke capabilities orbiting our central mission to help your business grow.
+          </p>
+        </div>
       </div>
 
       {/* Interactive 3D Orbital Services Fleet Hero */}

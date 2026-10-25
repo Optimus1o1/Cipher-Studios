@@ -1,0 +1,92 @@
+{
+  "results": {
+    "hero-eyebrow": {
+      "id": "hero-eyebrow",
+      "name": "Eyebrow",
+      "targetRatio": 4.5,
+      "defaultHex": "#E0A45C",
+      "rect": {
+        "x": 868,
+        "y": 154,
+        "width": 170,
+        "height": 23
+      },
+      "textRGB": [
+        253,
+        226,
+        189
+      ],
+      "textLum": 0.7894948241103161,
+      "p95Lum": 0.01808268519853327,
+      "minLum": 0.004544552877534591,
+      "maxLum": 0.02259965931879244,
+      "medianLum": 0.013241373094613805,
+      "contrast95": 12.33,
+      "passed": true
+    },
+    "hero-headline": {
+      "id": "hero-headline",
+      "name": "Headline",
+      "targetRatio": 3,
+      "defaultHex": "#ECEEF4",
+      "rect": {
+        "x": 586,
+        "y": 192,
+        "width": 732,
+        "height": 156
+      },
+      "textRGB": [
+        236,
+        238,
+        244
+      ],
+      "textLum": 0.8551359200175743,
+      "p95Lum": 0.017236148915385816,
+      "minLum": 0.0022163321798601456,
+      "maxLum": 0.02702860853535865,
+      "medianLum": 0.009312983765897955,
+      "contrast95": 13.46,
+      "passed": true
+    },
+    "hero-subtitle": {
+      "id": "hero-subtitle",
+      "name": "Subtitle",
+      "targetRatio": 4.5,
+      "defaultHex": "#C9CEDC",
+      "rect": {
+        "x": 625,
+        "y": 372,
+        "width": 654,
+        "height": 94
+      },
+      "textRGB": [
+        201,
+        206,
+        220
+      ],
+      "textLum": 0.6172742758227638,
+      "p95Lum": 0.04720501364282732,
+      "minLum": 0.004511105666559549,
+      "maxLum": 0.10670398004895004,
+      "medianLum": 0.020495401842021668,
+      "contrast95": 6.86,
+      "passed": true
+    }
+  },
+  "moonDiff": 0.4541,
+  "moonDiffPassed": true,
+  "allFrameDiffs": [
+    0.4541,
+    10.4151,
+    10.9686,
+    11.4797,
+    11.7962,
+    11.9816,
+    12.2584,
+    12.3273,
+    12.5475,
+    12.6706,
+    12.8619,
+    12.9868
+  ]
+}
