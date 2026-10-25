@@ -1,238 +1,112 @@
-import React from "react";
-import Link from "next/link";
-import { BackgroundScene } from "@/components/ui/glass/BackgroundScene";
-import { GlassCard } from "@/components/ui/glass/GlassCard";
-import { AccentCard } from "@/components/ui/glass/AccentCard";
-import { Button } from "@/components/ui/Button";
-import {
-  Layers,
-  Sparkles,
-  Cpu,
-  ShoppingBag,
-  Zap,
-  RefreshCw,
-  CheckCircle2,
-  ArrowRight,
-  Shield,
-  Clock,
-} from "lucide-react";
+import React from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowUpRight, Clock, UserCheck, ArrowRight } from 'lucide-react';
+import { Section } from '@/components/ui/Section';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Button } from '@/components/ui/Button';
+import { servicesData } from '@/data/services';
+import { processSteps } from '@/data/process';
+import { OrbitalServicesHero } from '@/components/ui/orbital/OrbitalServicesHero';
+import { ServicesGrid } from '@/components/ui/orbital/ServicesGrid';
 
-export const metadata = {
-  title: "Services & Pricing Floor | CIPHER",
+export const metadata: Metadata = {
+  title: 'Services | Moon Sanctum Labs',
   description:
-    "Explore CIPHER's bespoke engineering offerings: SaaS MVPs, Web Apps, High-Conversion Landing Pages, and Retainers.",
+    'Six senior disciplines: Web design, web development, SEO, digital marketing, branding, and care plans. Transparent timelines and total ownership.',
 };
-
-const SERVICES = [
-  {
-    id: "saas-mvp",
-    title: "SaaS MVPs & Full-Stack Web Apps",
-    badge: "FLAGSHIP",
-    timeline: "3–6 Weeks",
-    pricing: { usd: "$4,500 – $12,000", inr: "₹3,50,000 – ₹9,50,000" },
-    tagline: "From zero to production-ready multi-tenant software with clean code",
-    deliverables: [
-      "Next.js App Router & strict TypeScript architecture",
-      "PostgreSQL database setup (Supabase or Neon) with Prisma ORM",
-      "Authentication (Auth.js or Clerk) with role-based access control",
-      "Stripe / Razorpay payment integration & webhook management",
-      "Automated email notifications via Resend",
-      "Deploy-ready CI/CD configuration on Render or Vercel",
-    ],
-    icon: <Layers className="size-6 text-copper" />,
-    isFlagship: true,
-  },
-  {
-    id: "landing-pages",
-    title: "High-Conversion Digital Flagships",
-    badge: "PERFORMANCE",
-    timeline: "7–14 Days",
-    pricing: { usd: "$1,800 – $3,500", inr: "₹1,40,000 – ₹2,80,000" },
-    tagline: "Laser-focused landing pages engineered for maximum conversion velocity",
-    deliverables: [
-      "Mobile-first bespoke layout with zero WordPress bloat",
-      "Sub-second First Contentful Paint & Lighthouse 95+ score",
-      "Custom micro-interactions and Framer Motion choreography",
-      "Lead intake form with server actions, honeypot & validation",
-      "Open Graph assets, JSON-LD structured data, and SEO optimization",
-    ],
-    icon: <Sparkles className="size-6 text-copper" />,
-  },
-  {
-    id: "dashboards",
-    title: "Internal Tooling & Command Centers",
-    badge: "ENTERPRISE",
-    timeline: "2–4 Weeks",
-    pricing: { usd: "$3,200 – $7,500", inr: "₹2,50,000 – ₹6,00,000" },
-    tagline: "Custom telemetry dashboards that replace messy spreadsheets",
-    deliverables: [
-      "Real-time WebSocket / polling data synchronization",
-      "High-density data tables with sorting, filtering, and CSV export",
-      "Granular permission controls & session logging",
-      "Custom glass UI command cockpit ergonomics",
-    ],
-    icon: <Cpu className="size-6 text-copper" />,
-  },
-  {
-    id: "ecommerce",
-    title: "Headless E-Commerce Flagships",
-    badge: "COMMERCE",
-    timeline: "3–5 Weeks",
-    pricing: { usd: "$3,800 – $8,500", inr: "₹3,00,000 – ₹6,80,000" },
-    tagline: "Blazing fast storefronts designed to convert mobile shoppers",
-    deliverables: [
-      "Shopify Storefront API or bespoke cart/checkout pipeline",
-      "Instant page transitions and client-side cart drawer",
-      "Custom product configurators and high-resolution media galleries",
-      "Abandoned checkout tracking and automated recovery emails",
-    ],
-    icon: <ShoppingBag className="size-6 text-copper" />,
-  },
-  {
-    id: "speed",
-    title: "Speed Audits & Architectural Redesigns",
-    badge: "RECOVERY",
-    timeline: "5–10 Days",
-    pricing: { usd: "$1,500 – $3,000", inr: "₹1,20,000 – ₹2,40,000" },
-    tagline: "Transforming sluggish sites into sub-second revenue machines",
-    deliverables: [
-      "Comprehensive Core Web Vitals diagnostic & bottleneck trace",
-      "Asset optimization, font reduction, and dynamic code splitting",
-      "Server-side caching strategies and edge distribution",
-      "Guaranteed Lighthouse mobile improvement to 90+",
-    ],
-    icon: <Zap className="size-6 text-copper" />,
-  },
-  {
-    id: "retainer",
-    title: "Monthly Evolution & Engineering Retainer",
-    badge: "CONTINUOUS",
-    timeline: "Ongoing",
-    pricing: { usd: "$1,200 – $2,500 / mo", inr: "₹95,000 – ₹1,95,000 / mo" },
-    tagline: "Dedicated senior engineering bandwidth to keep compounding your product",
-    deliverables: [
-      "Dedicated weekly sprint hours for feature additions",
-      "Proactive performance monitoring & security updates",
-      "Conversion rate optimization experiments & A/B testing",
-      "Direct Slack / WhatsApp channel with Aniket Nandi",
-    ],
-    icon: <RefreshCw className="size-6 text-copper" />,
-  },
-];
 
 export default function ServicesPage() {
   return (
-    <div className="relative min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8">
-      <BackgroundScene intensity="normal" />
+    <div className="w-full pt-28 pb-20 pointer-events-none">
+      {/* Services Header */}
+      <div className="max-w-content mx-auto px-6 md:px-8 pt-10 pb-6 text-center pointer-events-none select-none">
+        <span className="text-accent text-[0.95rem] font-medium tracking-wide uppercase inline-block">
+          Studio Capabilities
+        </span>
+        <h1 className="font-serif font-light text-ink text-[2.8rem] md:text-[4.6rem] leading-[1.06] tracking-[-0.025em] max-w-[16ch] mx-auto mt-4 mb-6">
+          Six services, one team, one standard.
+        </h1>
+        <p className="text-mute text-[1.12rem] md:text-[1.2rem] leading-relaxed max-w-[54ch] mx-auto">
+          Choose an individual service or commission an end-to-end launch. Six bespoke capabilities orbiting our central mission to help your business grow.
+        </p>
+      </div>
 
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="max-w-3xl">
-          <span className="text-xs font-mono text-copper uppercase tracking-widest">
-            CLEAR TIERS &middot; TRANSPARENT FLOORS
-          </span>
-          <h1 className="mt-4 text-4xl sm:text-6xl font-heading font-semibold text-bone tracking-tight leading-[1.1]">
-            Engineered Offerings. <br />
-            <span className="text-slate-dark">Fixed Scopes. Zero Surprises.</span>
-          </h1>
-          <p className="mt-6 text-base sm:text-lg text-slate-dark leading-relaxed">
-            We never quote below our pricing floor because quality engineering cannot be discounted without compromising performance, accessibility, or security. Every engagement includes complete source code ownership.
-          </p>
-        </div>
+      {/* Interactive 3D Orbital Services Fleet Hero */}
+      <OrbitalServicesHero />
 
-        {/* Services List */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {SERVICES.map((srv) => (
-            <GlassCard
-              key={srv.id}
-              id={srv.id}
-              tone={srv.isFlagship ? "accent" : "dark"}
-              className="p-6 sm:p-10 flex flex-col justify-between border border-white/15 hover-lift"
+      {/* Services Grid with Synchronized Orbital States */}
+      <Section veil={false} borderTop={true} className="py-12 pointer-events-auto">
+        <ServicesGrid />
+      </Section>
+
+      {/* Process Section */}
+      <Section id="process" borderTop={true} className="mt-16 pointer-events-auto">
+        <SectionHeading
+          tag="Our Methodology"
+          title="A calm, clear path from first call to launch."
+          lead="How we run every single engagement, ensuring complete alignment before a single line of code is produced."
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {processSteps.map((step) => (
+            <div
+              key={step.number}
+              className="border-t border-line pt-6 space-y-3"
             >
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="p-3 rounded-full bg-white/5 border border-white/10">
-                    {srv.icon}
-                  </div>
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-copper bg-copper/10 px-3 py-1 rounded-full border border-copper/25">
-                    {srv.badge}
-                  </span>
-                </div>
-
-                <h2 className="mt-6 text-2xl sm:text-3xl font-heading font-semibold text-bone">
-                  {srv.title}
-                </h2>
-                <p className="mt-2 text-sm text-slate-dark font-medium">
-                  {srv.tagline}
-                </p>
-
-                {/* Timeline & Pricing Pill */}
-                <div className="mt-6 p-4 rounded-glass-sm bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-                  <div className="flex items-center gap-1.5 text-slate-dark">
-                    <Clock className="size-3.5 text-copper" />
-                    <span>Timeline:</span>
-                    <strong className="text-bone">{srv.timeline}</strong>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-copper font-semibold">{srv.pricing.usd}</span>
-                    <span className="text-slate-dark ml-1">({srv.pricing.inr})</span>
-                  </div>
-                </div>
-
-                {/* Deliverables List */}
-                <div className="mt-6 space-y-2.5">
-                  <p className="text-xs font-mono uppercase tracking-wider text-bone font-medium">
-                    What&apos;s Included:
-                  </p>
-                  <ul className="space-y-2 text-xs sm:text-sm text-slate-dark">
-                    {srv.deliverables.map((d, i) => (
-                      <li key={i} className="flex items-start gap-2.5">
-                        <CheckCircle2 className="size-4 text-copper shrink-0 mt-0.5" />
-                        <span className="text-bone/85">{d}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <span className="text-xs font-mono text-slate-dark">
-                  Ready to spec this?
-                </span>
-                <Link href={`/contact?service=${encodeURIComponent(srv.title)}`} className="w-full sm:w-auto">
-                  <Button size="sm" variant={srv.isFlagship ? "primary" : "glass"} className="w-full sm:w-auto justify-center">
-                    Book Consultation
-                  </Button>
-                </Link>
-              </div>
-            </GlassCard>
+              <span className="text-accent text-[0.88rem] font-mono font-medium">
+                0{step.number}
+              </span>
+              <h3 className="font-serif text-ink text-[1.5rem] font-light">
+                {step.title}
+              </h3>
+              <p className="text-mute text-[0.96rem] leading-relaxed">
+                {step.description}
+              </p>
+            </div>
           ))}
         </div>
+      </Section>
 
-        {/* Guarantees Box */}
-        <div className="mt-16 p-8 sm:p-10 rounded-glass glass-dark border border-white/15">
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className="size-6 text-copper" />
-            <h3 className="text-xl font-heading font-semibold text-bone">
-              The CIPHER Engineering Guarantee
+      {/* Free Website Review Callout */}
+      <div className="max-w-content mx-auto px-6 md:px-8 pt-12 pointer-events-auto">
+        <div className="p-6 md:p-8 rounded-card bg-bg-surface border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h3 className="font-serif font-light text-ink text-[1.35rem] md:text-[1.5rem]">
+              Not sure what you need?
             </h3>
+            <p className="text-mute text-[0.98rem] leading-relaxed max-w-[50ch]">
+              Send us your website address and we&apos;ll pinpoint the top three fixes for speed, Google ranking, and conversions.
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs sm:text-sm text-slate-dark">
-            <div>
-              <strong className="text-bone block mb-1">100% Code Ownership</strong>
-              You receive full administrative rights to your GitHub repository and cloud accounts on final payment.
-            </div>
-            <div>
-              <strong className="text-bone block mb-1">Lighthouse 95+ Standard</strong>
-              Every page is audited on a throttled mobile profile before delivery. We do not ship slow websites.
-            </div>
-            <div>
-              <strong className="text-bone block mb-1">30-Day Post-Launch Warranty</strong>
-              We fix any bug or regression discovered within 30 days of production deployment at zero additional charge.
-            </div>
-          </div>
+          <Button
+            href="/website-review?utm_source=msl-site&utm_medium=internal&utm_campaign=service-page"
+            size="md"
+            variant="secondary"
+            className="shrink-0"
+          >
+            Get a free website review
+          </Button>
         </div>
       </div>
+
+      {/* Bottom CTA */}
+      <Section borderTop={true} className="bg-veil-deep mt-16 text-center pointer-events-auto">
+        <div className="max-w-[650px] mx-auto space-y-6">
+          <h2 className="font-serif text-ink text-[2.4rem] md:text-[3.2rem] font-light">
+            Need a tailored package?
+          </h2>
+          <p className="text-mute text-[1.1rem] leading-relaxed">
+            Most growing businesses combine design, development and ongoing SEO.
+            Tell us your goals and we will structure a clear, unified project proposal.
+          </p>
+          <div className="pt-2">
+            <Button href="/contact" size="lg" variant="primary">
+              Request a project quote
+            </Button>
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DeviceTier } from "@/types";
+export type DeviceTier = 'full' | 'lite' | 'off' | 'checking';
 
 /**
  * useDeviceTier: Hardware capability and accessibility gate

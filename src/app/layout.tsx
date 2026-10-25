@@ -1,94 +1,86 @@
-import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Manrope } from "next/font/google";
-import "./globals.css";
-import { GlassNav } from "@/components/ui/GlassNav";
-import { Footer } from "@/components/ui/Footer";
-import { FloatingColorEffect } from "@/components/ui/FloatingColorEffect";
+import type { Metadata } from 'next';
+import { Inter, Fraunces } from 'next/font/google';
+import './globals.css';
+import { TopChrome, BottomChrome } from '@/components/ui/SiteChrome';
+import { OrbitalProvider } from '@/context/OrbitalContext';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
 });
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['300', '400', '500'],
+  variable: '--font-fraunces',
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cipherstudios.dev"),
-  title: "CIPHER — Decode. Build. Evolve. | Web Design & Development Agency",
+  title: 'Moon Sanctum Labs | Web Design, Development, SEO & Growth',
   description:
-    "Bespoke digital product & engineering studio founded by Aniket Nandi. We decode what your business actually needs, build it properly, and keep it evolving.",
+    'Moon Sanctum Labs is a senior web design and search studio in Kolkata, India. We design, build and scale fast, beautiful websites for business owners and founders worldwide.',
   keywords: [
-    "CIPHER",
-    "web development agency",
-    "Next.js agency",
-    "SaaS MVP development",
-    "Aniket Nandi",
-    "Kolkata web studio",
-    "Decode Build Evolve",
+    'web design',
+    'web development',
+    'SEO',
+    'digital marketing',
+    'branding',
+    'Kolkata web studio',
+    'Moon Sanctum Labs',
   ],
-  authors: [{ name: "Aniket Nandi" }],
+  authors: [{ name: 'Moon Sanctum Labs' }],
+  metadataBase: new URL('https://moonsanctumlabs.com'),
   openGraph: {
-    title: "CIPHER — Decode. Build. Evolve.",
+    title: 'Moon Sanctum Labs — Decode. Build. Evolve.',
     description:
-      "Bespoke web apps, high-conversion digital flagships, and SaaS MVPs engineered without bloated templates or tech debt.",
-    url: "https://cipherstudios.dev",
-    siteName: "CIPHER",
-    images: [
-      {
-        url: "/og-cover-1200x630.png",
-        width: 1200,
-        height: 630,
-        alt: "CIPHER — Decode. Build. Evolve.",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
+      'Websites that make your business easy to find and hard to forget. Senior web design, development and search growth.',
+    siteName: 'Moon Sanctum Labs',
+    locale: 'en_US',
+    type: 'website',
   },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/icon-192.png",
-    apple: "/apple-icon-180.png",
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Moon Sanctum Labs | Senior Web Studio',
+    description:
+      'Websites that make your business easy to find and hard to forget.',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
-
-export const viewport: Viewport = {
-  themeColor: "#0F1013",
-  width: "device-width",
-  initialScale: 1,
-};
-
-import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
-import dynamic from "next/dynamic";
-
-const GlobalSpaceBackground = dynamic(
-  () => import("@/components/three/GlobalSpaceBackground"),
-  { ssr: false }
-);
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${manrope.variable} dark`}>
-      <body className="bg-ink text-bone font-body min-h-screen flex flex-col selection:bg-copper selection:text-ink">
-        <SmoothScrollProvider>
-          <GlobalSpaceBackground />
-          <FloatingColorEffect />
-          <GlassNav />
-          <main className="flex-1 relative z-10">{children}</main>
-          <Footer />
-        </SmoothScrollProvider>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+      <body className="bg-bg text-ink min-h-screen flex flex-col selection:bg-accent selection:text-bg">
+        <OrbitalProvider>
+          {/* Skip to main content for accessibility */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-[9999] px-4 py-2 bg-accent text-bg font-semibold rounded-pill shadow-lg focus:outline-none"
+          >
+            Skip to main content
+          </a>
+
+          {/* 3D moon + navigation (hidden on landing pages such as /website-review) */}
+          <TopChrome />
+
+          {/* Main Content Area */}
+          <main id="main-content" className="relative z-10 flex-grow pointer-events-none">
+            {children}
+          </main>
+
+          {/* Footer (hidden on landing pages) */}
+          <BottomChrome />
+        </OrbitalProvider>
       </body>
     </html>
   );
 }
-

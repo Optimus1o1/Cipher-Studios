@@ -1,150 +1,101 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
-import { ArrowUpRight, Clock, Globe, ShieldCheck } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
+import { servicesData } from '@/data/services';
 
 export function Footer() {
-  const [kolkataTime, setKolkataTime] = useState<string>("");
-
-  useEffect(() => {
-    const updateTime = () => {
-      try {
-        const timeStr = new Date().toLocaleTimeString("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        });
-        setKolkataTime(timeStr);
-      } catch (e) {
-        setKolkataTime("IST (UTC+5:30)");
-      }
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative border-t border-white/10 bg-ink pt-16 pb-12 px-4 sm:px-6 lg:px-8 text-bone overflow-hidden">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10">
-        {/* Brand Column */}
-        <div className="md:col-span-5 space-y-4">
-          <Link href="/" className="inline-block" aria-label="CIPHER Home">
-            <Logo size={36} tone="dark" withWordmark={true} />
-          </Link>
+    <footer className="relative z-10 bg-veil border-t border-line text-mute text-[0.92rem] py-16">
+      <div className="max-w-content mx-auto px-6 md:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          {/* Brand & Location */}
+          <div className="space-y-4">
+            <Link
+              href="/"
+              className="flex items-center gap-3 font-serif text-[1.18rem] text-ink hover:text-accent transition-colors"
+            >
+              <span
+                className="relative block w-5 h-5 rounded-full bg-ink overflow-hidden"
+                aria-hidden="true"
+              >
+                <span className="absolute inset-0 rounded-full bg-bg -translate-x-[36%]" />
+              </span>
+              <span className="font-light">Moon Sanctum Labs</span>
+            </Link>
+            <p className="text-mute leading-relaxed">
+              Kolkata, India. Working with founders and businesses worldwide.
+            </p>
+            <p>
+              <a
+                href="mailto:hello@moonsanctumlabs.com"
+                className="text-ink hover:text-accent transition-colors"
+              >
+                hello@moonsanctumlabs.com
+              </a>
+            </p>
+          </div>
 
-          <p className="text-sm font-heading font-medium text-copper">
-            Decode. Build. Evolve.
-          </p>
+          {/* Services Links */}
+          <div className="space-y-3">
+            <h4 className="text-ink text-[0.88rem] uppercase tracking-wider font-semibold">
+              Services
+            </h4>
+            <ul className="space-y-2">
+              {servicesData.map((service) => (
+                <li key={service.slug}>
+                  <Link
+                    href={`/services/${service.slug}`}
+                    className="hover:text-ink transition-colors block py-0.5"
+                  >
+                    {service.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          <p className="text-xs sm:text-sm text-slate-dark max-w-sm leading-relaxed">
-            A bespoke digital product & engineering studio founded by Aniket Nandi. We build web apps, SaaS MVPs, and digital flagships engineered for speed, conversion, and longevity.
-          </p>
-
-          {/* Location & IST Telemetry pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-dark">
-            <Globe className="size-3.5 text-copper" />
-            <span>Kolkata, India</span>
-            <span className="text-white/20">&bull;</span>
-            <Clock className="size-3 text-copper" />
-            <span className="text-bone">{kolkataTime || "12:00:00 PM IST"}</span>
+          {/* Company & Legal */}
+          <div className="space-y-3">
+            <h4 className="text-ink text-[0.88rem] uppercase tracking-wider font-semibold">
+              Company
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/services" className="hover:text-ink transition-colors block py-0.5">
+                  All Services
+                </Link>
+              </li>
+              <li>
+                <Link href="/#process" className="hover:text-ink transition-colors block py-0.5">
+                  Process
+                </Link>
+              </li>
+              <li>
+                <Link href="/#principles" className="hover:text-ink transition-colors block py-0.5">
+                  Principles
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-ink transition-colors block py-0.5">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/website-review?utm_source=msl-site&utm_medium=internal&utm_campaign=footer-link"
+                  className="text-accent hover:text-ink transition-colors block py-0.5 font-medium"
+                >
+                  Free Website Review
+                </Link>
+              </li>
+            </ul>
+            <div className="pt-4 text-xs text-mute/80 space-y-1">
+              <p>&copy; {currentYear} Moon Sanctum Labs. All rights reserved.</p>
+              <p>Procedural lunar topology generated with mathematical noise models.</p>
+            </div>
           </div>
         </div>
-
-        {/* Links Navigation */}
-        <div className="md:col-span-2 space-y-3">
-          <p className="text-xs font-mono uppercase tracking-wider text-bone font-medium">
-            Navigation
-          </p>
-          <ul className="space-y-2 text-xs sm:text-sm text-slate-dark">
-            <li>
-              <Link href="/services" className="hover:text-copper transition-colors">
-                Services & Pricing
-              </Link>
-            </li>
-            <li>
-              <Link href="/work" className="hover:text-copper transition-colors">
-                Case Studies
-              </Link>
-            </li>
-            <li>
-              <Link href="/about" className="hover:text-copper transition-colors">
-                About the Studio
-              </Link>
-            </li>
-            <li>
-              <Link href="/#process" className="hover:text-copper transition-colors">
-                Methodology
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="hover:text-copper transition-colors">
-                Project Intake
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Client & Utility */}
-        <div className="md:col-span-2 space-y-3">
-          <p className="text-xs font-mono uppercase tracking-wider text-bone font-medium">
-            Portals
-          </p>
-          <ul className="space-y-2 text-xs sm:text-sm text-slate-dark">
-            <li>
-              <Link href="/portal" className="hover:text-copper transition-colors flex items-center gap-1">
-                <span>Client Portal</span>
-                <ArrowUpRight className="size-3 text-copper" />
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin" className="hover:text-copper transition-colors flex items-center gap-1">
-                <span>Agency Admin</span>
-                <ArrowUpRight className="size-3 text-copper" />
-              </Link>
-            </li>
-            <li>
-              <Link href="/styleguide" className="hover:text-copper transition-colors">
-                Design System
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact & Guarantees */}
-        <div className="md:col-span-3 space-y-3">
-          <p className="text-xs font-mono uppercase tracking-wider text-bone font-medium">
-            Direct Inquiries
-          </p>
-          <p className="text-xs text-slate-dark leading-relaxed">
-            Accepting select client engagements for Q3/Q4. Full code ownership, zero lock-in, Lighthouse 95+ performance guarantee.
-          </p>
-          <a
-            href="mailto:contact@cipherstudios.dev"
-            className="inline-block text-xs font-mono text-copper hover:underline"
-          >
-            contact@cipherstudios.dev
-          </a>
-
-          <div className="pt-2 flex items-center gap-2 text-[11px] text-slate-dark">
-            <ShieldCheck className="size-3.5 text-copper" />
-            <span>WCAG AA &amp; Core Web Vitals Guaranteed</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-dark font-mono">
-        <p>
-          &copy; {new Date().getFullYear()} CIPHER Studios. All rights reserved. Slogan: Decode. Build. Evolve.
-        </p>
-        <p>
-          Lead Engineer &amp; Designer: Aniket Nandi
-        </p>
       </div>
     </footer>
   );

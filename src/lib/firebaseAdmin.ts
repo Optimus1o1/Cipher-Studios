@@ -1,104 +1,58 @@
-import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
+import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
-const projectId =
-  process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "cipher-studios";
-const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-const rawPrivateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-const privateKey = rawPrivateKey ? rawPrivateKey.replace(/\\n/g, "\n") : undefined;
-
-let adminApp: App | null = null;
-
-export function getFirebaseAdminApp(): App | null {
+function getFirebaseAdmin(): { app: App | null; firestore: Firestore | null } {
   const existingApps = getApps();
-  if (existingApps.length > 0 && existingApps[0]) {
-    return existingApps[0];
+  if (existingApps.length > 0) {
+    const app = existingApps[0];
+    return {
+      app,
+      firestore: getFirestore(app),
+    };
   }
 
-  if (clientEmail && privateKey && projectId) {
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+  if (privateKey) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+
+  if (projectId && clientEmail && privateKey) {
     try {
-      adminApp = initializeApp({
+      const app = initializeApp({
         credential: cert({
           projectId,
           clientEmail,
           privateKey,
         }),
       });
-      return adminApp;
-    } catch (err) {
-      console.warn("Firebase Admin cert initialization warning:", err);
+      return {
+        app,
+        firestore: getFirestore(app),
+      };
+    } catch (error) {
+      console.warn('Firebase Admin cert initialization failed:', error);
     }
   }
 
   if (projectId) {
     try {
-      adminApp = initializeApp({ projectId });
-      return adminApp;
-    } catch (err) {
-      console.warn("Firebase Admin project initialization warning:", err);
-    }
-  }
-
-  return null;
-}
-
-export interface VerifiedSessionUser {
-  uid: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-  role?: string;
-  isAdmin?: boolean;
-}
-
-/**
- * Verifies Firebase ID Token on server side with Firebase Admin SDK,
- * extracting verified custom claims and security roles.
- */
-export async function verifyIdToken(idToken: string): Promise<VerifiedSessionUser | null> {
-  const app = getFirebaseAdminApp();
-
-  if (app) {
-    try {
-      const decoded = await getAuth(app).verifyIdToken(idToken);
-      const isAdmin =
-        decoded.role === "admin" ||
-        decoded.admin === true ||
-        decoded.email === "aniket@cipherstudios.dev";
-
+      const app = initializeApp({ projectId });
       return {
-        uid: decoded.uid,
-        email: decoded.email,
-        name: (decoded.name as string) || (decoded.email ? decoded.email.split("@")[0] : "Client User"),
-        picture: decoded.picture,
-        role: isAdmin ? "admin" : "client",
-        isAdmin,
+        app,
+        firestore: getFirestore(app),
       };
-    } catch (err) {
-      console.warn("Firebase Admin verifyIdToken error:", err);
+    } catch (error) {
+      console.warn('Firebase Admin projectId initialization failed:', error);
     }
   }
 
-  // Development fallback for local environments without deployed Service Account credentials
-  if (process.env.NODE_ENV !== "production") {
-    try {
-      const parts = idToken.split(".");
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
-        const email = payload.email || "client@cipherstudios.dev";
-        const isAdmin = email.includes("admin") || email === "aniket@cipherstudios.dev";
-        return {
-          uid: payload.user_id || payload.sub || "dev-client-uid",
-          email,
-          name: payload.name || (email ? email.split("@")[0] : "Client User"),
-          role: isAdmin ? "admin" : "client",
-          isAdmin,
-        };
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  return null;
+  return {
+    app: null,
+    firestore: null,
+  };
 }
+
+export const { app: firebaseAdminApp, firestore: adminDb } = getFirebaseAdmin();

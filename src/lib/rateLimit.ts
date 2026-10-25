@@ -1,66 +1,48 @@
-/**
- * In-Memory Sliding Window Rate Limiter for API Route Handlers.
- * Edge and Serverless compatible with automatic stale IP garbage collection.
- */
-
 interface RateLimitRecord {
-  timestamps: number[];
+  count: number;
+  resetAt: number;
 }
 
-const ipBuckets = new Map<string, RateLimitRecord>();
-
-// Garbage collect stale records every 10 minutes
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    ipBuckets.forEach((record, ip) => {
-      record.timestamps = record.timestamps.filter((t) => now - t < 15 * 60 * 1000);
-      if (record.timestamps.length === 0) {
-        ipBuckets.delete(ip);
-      }
-    });
-  }, 10 * 60 * 1000);
-}
+const ipMap = new Map<string, RateLimitRecord>();
 
 export function checkRateLimit(
   ip: string,
-  maxRequests: number = 5,
-  windowMs: number = 15 * 60 * 1000
-): { allowed: boolean; remaining: number; resetMs: number } {
+  limit: number = 5,
+  windowMs: number = 10 * 60 * 1000
+): { allowed: boolean; remaining: number; resetAt: number } {
   const now = Date.now();
-  const cleanIp = ip || "anonymous-client";
+  const existing = ipMap.get(ip);
 
-  let record = ipBuckets.get(cleanIp);
-  if (!record) {
-    record = { timestamps: [] };
-    ipBuckets.set(cleanIp, record);
+  // Clean expired
+  if (existing && existing.resetAt <= now) {
+    ipMap.delete(ip);
   }
 
-  // Remove timestamps outside window
-  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+  const current = ipMap.get(ip) || { count: 0, resetAt: now + windowMs };
 
-  if (record.timestamps.length >= maxRequests) {
-    const oldest = record.timestamps[0];
-    const resetMs = Math.max(0, windowMs - (now - oldest));
-    return { allowed: false, remaining: 0, resetMs };
+  if (current.count >= limit) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetAt: current.resetAt,
+    };
   }
 
-  record.timestamps.push(now);
+  current.count += 1;
+  ipMap.set(ip, current);
+
+  // Periodic cleanup if map grows
+  if (ipMap.size > 1000) {
+    ipMap.forEach((val, key) => {
+      if (val.resetAt <= now) {
+        ipMap.delete(key);
+      }
+    });
+  }
+
   return {
     allowed: true,
-    remaining: maxRequests - record.timestamps.length,
-    resetMs: windowMs,
+    remaining: limit - current.count,
+    resetAt: current.resetAt,
   };
-}
-
-export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  const realIp = req.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
-  }
-  return "127.0.0.1";
 }

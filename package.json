@@ -1,5 +1,5 @@
 {
-  "name": "cipher-studios",
+  "name": "moon-sanctum-labs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -15,16 +15,13 @@
     "firebase": "^10.12.2",
     "firebase-admin": "^14.4.0",
     "framer-motion": "^11.2.10",
-    "gsap": "^3.12.5",
-    "lenis": "^1.1.9",
     "lucide-react": "^0.395.0",
     "next": "^14.2.24",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^2.3.0",
     "three": "^0.165.0",
-    "zod": "^3.23.8",
-    "zustand": "^4.5.2"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

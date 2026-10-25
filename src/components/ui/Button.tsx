@@ -1,70 +1,64 @@
-"use client";
+import React, { forwardRef } from 'react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-import React, { ButtonHTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
-
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "glass" | "ghost" | "accent";
-  size?: "sm" | "md" | "lg";
-  isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'glass';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  external?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      variant = "primary",
-      size = "md",
-      isLoading = false,
-      leftIcon,
-      rightIcon,
-      className,
-      children,
-      disabled,
-      ...props
-    },
-    ref
-  ) => {
-    const sizeClasses = {
-      sm: "px-3.5 py-1.5 text-xs min-h-[36px]",
-      md: "px-5 py-2.5 text-sm min-h-[44px]",
-      lg: "px-7 py-3.5 text-base min-h-[52px]",
+  ({ className, variant = 'primary', size = 'md', href, external, children, ...props }, ref) => {
+    const baseStyles =
+      'inline-flex items-center justify-center font-sans font-medium rounded-pill transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98] select-none';
+
+    const variants = {
+      primary:
+        'bg-ink text-[#07080f] hover:bg-transparent hover:text-ink border border-ink shadow-sm',
+      secondary:
+        'bg-transparent text-ink border border-line hover:border-ink hover:text-ink',
+      ghost:
+        'bg-transparent text-mute hover:text-ink hover:bg-white/5 border border-transparent',
+      glass:
+        'glass text-ink hover:border-accent/40 hover:bg-white/10 shadow-glass',
     };
 
-    const variantClasses = {
-      primary:
-        "bg-copper text-ink font-semibold hover:bg-copper-hover active:bg-copper-active shadow-md hover:shadow-copper-glow border border-copper/50",
-      secondary:
-        "bg-white/10 text-bone hover:bg-white/15 active:bg-white/20 border border-white/15",
-      glass:
-        "glass-dark text-bone hover:border-copper/40 active:border-copper/60 hover-lift",
-      ghost:
-        "bg-transparent text-slate-dark hover:text-bone hover:bg-white/5 active:bg-white/10",
-      accent:
-        "bg-gradient-to-r from-copper to-amber-500 text-ink font-semibold shadow-lg hover:shadow-copper-glow border border-copper/60",
+    const sizes = {
+      sm: 'text-[0.88rem] px-4 py-2 min-h-[36px]',
+      md: 'text-[0.95rem] px-6 py-3 min-h-[44px]',
+      lg: 'text-[1.05rem] px-8 py-4 min-h-[52px]',
     };
+
+    const combinedClassName = cn(baseStyles, variants[variant], sizes[size], className);
+
+    if (href) {
+      if (external) {
+        return (
+          <a
+            href={href}
+            className={combinedClassName}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {children}
+          </a>
+        );
+      }
+      return (
+        <Link href={href} className={combinedClassName}>
+          {children}
+        </Link>
+      );
+    }
 
     return (
-      <button
-        ref={ref}
-        disabled={disabled || isLoading}
-        className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none select-none tracking-wide",
-          sizeClasses[size],
-          variantClasses[variant],
-          className
-        )}
-        {...props}
-      >
-        {isLoading && <Loader2 className="size-4 animate-spin" />}
-        {!isLoading && leftIcon && <span className="shrink-0">{leftIcon}</span>}
-        <span>{children}</span>
-        {!isLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
+      <button ref={ref} className={combinedClassName} {...props}>
+        {children}
       </button>
     );
   }
 );
 
-Button.displayName = "Button";
+Button.displayName = 'Button';

@@ -1,78 +1,81 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: "class",
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        bg: {
+          DEFAULT: '#05060d',
+          dark: '#05060d',
+          surface: '#0b0d18',
+          subtle: '#121526',
+          light: '#f7f7f9',
+        },
         ink: {
-          DEFAULT: "#0F1013",
-          light: "#16171B",
-          dark: "#08080A",
-          surface: "rgba(22, 23, 27, 0.65)",
+          DEFAULT: '#eceef4',
+          light: '#07080f',
+          muted: '#8e95aa',
         },
-        bone: {
-          DEFAULT: "#F2EFE8",
-          muted: "rgba(242, 239, 232, 0.72)",
-          subtle: "rgba(242, 239, 232, 0.12)",
+        mute: {
+          DEFAULT: '#8e95aa',
+          dark: '#8e95aa',
+          light: '#5e6475',
         },
-        copper: {
-          DEFAULT: "#E0A45C",
-          hover: "#E8B06D",
-          active: "#D4954A",
-          muted: "rgba(224, 164, 92, 0.16)",
-          glow: "rgba(224, 164, 92, 0.35)",
+        accent: {
+          DEFAULT: '#d8c3a0', // Warm Gold / Moon light
+          copper: '#e0a45c', // Copper brand accent
+          hover: '#c4ad88',
         },
-        slate: {
-          dark: "#8B9099",
-          light: "#5E636B",
+        line: {
+          DEFAULT: 'rgba(236, 238, 244, 0.11)',
+          dark: 'rgba(236, 238, 244, 0.11)',
+          light: 'rgba(15, 16, 19, 0.08)',
+        },
+        veil: {
+          DEFAULT: 'rgba(5, 6, 13, 0.82)',
+          deep: 'rgba(5, 6, 13, 0.94)',
         },
         glass: {
-          border: "rgba(255, 255, 255, 0.12)",
-          "border-light": "rgba(255, 255, 255, 0.35)",
-          bg: "rgba(22, 22, 24, 0.46)",
-          "bg-light": "rgba(255, 255, 255, 0.62)",
+          DEFAULT: 'rgba(255, 255, 255, 0.06)',
+          light: 'rgba(255, 255, 255, 0.65)',
+          dark: 'rgba(11, 13, 24, 0.62)',
+          border: 'rgba(236, 238, 244, 0.14)',
+          borderLight: 'rgba(255, 255, 255, 0.35)',
         },
       },
       fontFamily: {
-        heading: ["var(--font-space-grotesk)", "sans-serif"],
-        body: ["var(--font-manrope)", "sans-serif"],
-        mono: ["var(--font-space-grotesk)", "monospace"],
+        serif: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       borderRadius: {
-        "glass-sm": "16px",
-        glass: "24px",
-        "glass-lg": "32px",
-      },
-      backdropBlur: {
-        "glass-sm": "8px",
-        glass: "18px",
-        "glass-lg": "32px",
+        input: '12px',
+        card: '24px',
+        glass: '24px',
+        pill: '9999px',
       },
       boxShadow: {
-        glass: "0 24px 60px -24px rgba(0,0,0,0.45)",
-        "glass-sm": "0 12px 30px -12px rgba(0,0,0,0.35)",
-        "glass-hover": "0 28px 70px -20px rgba(0,0,0,0.55)",
-        "copper-glow": "0 0 40px -10px rgba(224, 164, 92, 0.45)",
+        glass: '0 24px 60px -24px rgba(0, 0, 0, 0.45)',
+        glow: '0 0 40px -10px rgba(216, 195, 160, 0.25)',
       },
-      animation: {
-        "drift-slow": "drift 30s ease-in-out infinite alternate",
-        "pulse-subtle": "subtlePulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      backdropBlur: {
+        glass: '18px',
+        'glass-sm': '8px',
+        'glass-lg': '32px',
       },
-      keyframes: {
-        drift: {
-          "0%": { transform: "translate(0px, 0px) scale(1)" },
-          "100%": { transform: "translate(20px, 15px) scale(1.03)" },
-        },
-        subtlePulse: {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.82" },
-        },
+      maxWidth: {
+        content: '1100px',
+      },
+      screens: {
+        sm: '640px',
+        md: '860px', // matching prototype blueprint breakpoint
+        lg: '1024px',
+        xl: '1280px',
       },
     },
   },

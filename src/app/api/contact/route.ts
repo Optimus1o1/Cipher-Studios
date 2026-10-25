@@ -1,94 +1,95 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { leadsStore } from "@/lib/leadsStore";
-import { LeadSubmission } from "@/types";
-import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
-
-function sanitize(input: string): string {
-  return input
-    .replace(/<[^>]*>/g, "") // strip HTML tags
-    .replace(/[&<>"'/]/g, (s) => {
-      const entityMap: Record<string, string> = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-        "/": "&#x2F;",
-      };
-      return entityMap[s] || s;
-    })
-    .trim();
-}
-
-const contactSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters").max(80),
-  email: z.string().email("Invalid email address").max(100),
-  company: z.string().max(100).optional(),
-  serviceType: z.string().min(1, "Service type is required"),
-  budgetRange: z.string().min(1, "Budget range is required"),
-  timeline: z.string().min(1, "Timeline is required"),
-  message: z.string().min(10, "Message must be at least 10 characters").max(2000),
-  honeypot: z.string().optional(),
-});
+import { NextRequest, NextResponse } from 'next/server';
+import { contactFormSchema } from '@/lib/validation';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function POST(req: NextRequest) {
   try {
-    const clientIp = getClientIp(req);
+    // 1. IP extraction & Rate limiting
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      '127.0.0.1';
 
-    // 1. Rate limiting guard (max 5 submissions per 15 minutes per IP)
-    const rate = checkRateLimit(clientIp, 5, 15 * 60 * 1000);
-    if (!rate.allowed) {
+    const rateResult = checkRateLimit(ip, 5, 10 * 60 * 1000);
+    if (!rateResult.allowed) {
       return NextResponse.json(
         {
-          error: "Rate limit exceeded. Please wait a few minutes before submitting another inquiry.",
+          success: false,
+          error: 'Too many submissions from this connection. Please try again shortly.',
         },
         { status: 429 }
       );
     }
 
+    // 2. Parse request body
     const body = await req.json();
 
-    // 2. Honeypot check: If bot fills honeypot, silently return 200 OK
-    if (body.honeypot && body.honeypot.trim() !== "") {
-      return NextResponse.json({ success: true, message: "Inquiry received" });
+    // 3. Honeypot check (anti-bot)
+    if (body.honeypot && body.honeypot.length > 0) {
+      // Pretend success to confuse spam bots
+      return NextResponse.json({
+        success: true,
+        message: 'Project details received.',
+      });
     }
 
-    // 3. Schema validation
-    const validated = contactSchema.parse(body);
+    // 4. Validate fields with Zod
+    const validation = contactFormSchema.safeParse(body);
+    if (!validation.success) {
+      const errorMsg = validation.error.errors[0]?.message || 'Invalid form input';
+      return NextResponse.json(
+        { success: false, error: errorMsg },
+        { status: 400 }
+      );
+    }
 
-    // 4. Sanitize all string inputs against XSS
-    const cleanLead: LeadSubmission = {
-      id: `lead-${Date.now()}`,
-      fullName: sanitize(validated.fullName),
-      email: validated.email.toLowerCase().trim(),
-      company: validated.company ? sanitize(validated.company) : "Direct Client",
-      serviceType: sanitize(validated.serviceType),
-      budgetRange: sanitize(validated.budgetRange),
-      timeline: sanitize(validated.timeline),
-      message: sanitize(validated.message),
-      createdAt: "Just now",
-      status: "new",
-    };
+    const { name, email, service, message } = validation.data;
 
-    leadsStore.unshift(cleanLead);
+    // 5. Store lead in Firestore if configured
+    let leadId = `lead_${Date.now()}`;
+    if (adminDb) {
+      try {
+        const docRef = await adminDb.collection('leads').add({
+          name,
+          email,
+          service,
+          message,
+          ip,
+          createdAt: new Date().toISOString(),
+          status: 'new',
+          source: 'website_contact_form',
+        });
+        leadId = docRef.id;
+      } catch (dbErr) {
+        console.error('Firestore write error:', dbErr);
+        // Continue gracefully so user is not blocked
+      }
+    } else {
+      console.log('Firebase Admin not configured; lead logged locally:', {
+        leadId,
+        name,
+        email,
+        service,
+        message,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
+    // 6. Return success
+    return NextResponse.json({
+      success: true,
+      leadId,
+      message:
+        'Thank you. We have received your project details and will reply within one working day.',
+    });
+  } catch (error) {
+    console.error('Error in /api/contact:', error);
     return NextResponse.json(
       {
-        success: true,
-        message: "Your project inquiry has been securely received. We will respond within 24 hours.",
-        leadId: cleanLead.id,
+        success: false,
+        error: 'An unexpected error occurred while submitting. Please email hello@moonsanctumlabs.com directly.',
       },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    console.error("Contact API error:", error);
-    if (error instanceof z.ZodError || error?.name === "ZodError" || error?.errors) {
-      const firstError = error?.errors?.[0]?.message || "Validation failed";
-      return NextResponse.json({ error: firstError }, { status: 400 });
-    }
-    return NextResponse.json(
-      { error: "Internal server error. Please contact directly." },
       { status: 500 }
     );
   }
