@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SATELLITE_CONFIGS, SatelliteConfig } from './types';
@@ -477,6 +477,25 @@ function OrbitalGuideRings({ isMobile }: { isMobile?: boolean }) {
 
 export function OrbitalSystem({ tier = 'full', isMobile }: OrbitalSystemProps) {
   const { selectedSlug, hoveredSlug, selectService, setHoveredSlug, isServicesRoute } = useOrbital();
+  const [currentPath, setCurrentPath] = useState(
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
+
+  useEffect(() => {
+    const checkPath = () => {
+      if (typeof window !== 'undefined') {
+        setCurrentPath((prev) => (prev !== window.location.pathname ? window.location.pathname : prev));
+      }
+    };
+    checkPath();
+    const interval = setInterval(checkPath, 100);
+    window.addEventListener('popstate', checkPath);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('popstate', checkPath);
+    };
+  }, []);
+
   const labelRectsRef = useRef<LabelRect[]>([]);
   const domLimitsRef = useRef<DomLimits>({
     navBottom: 72,
@@ -608,8 +627,22 @@ export function OrbitalSystem({ tier = 'full', isMobile }: OrbitalSystemProps) {
     };
   }, []);
 
+  const isServicePath =
+    typeof window !== 'undefined'
+      ? currentPath === '/services' ||
+        currentPath.startsWith('/services/') ||
+        window.location.pathname === '/services' ||
+        window.location.pathname.startsWith('/services/')
+      : isServicesRoute;
+
   useFrame(() => {
-    if (!isServicesRoute && !selectedSlug) {
+    const liveServicePath =
+      typeof window !== 'undefined'
+        ? window.location.pathname === '/services' ||
+          window.location.pathname.startsWith('/services/')
+        : isServicesRoute;
+
+    if (!liveServicePath && !selectedSlug) {
       return;
     }
 
@@ -618,7 +651,7 @@ export function OrbitalSystem({ tier = 'full', isMobile }: OrbitalSystemProps) {
   });
 
   // Only render orbital system on services routes or when navigating services
-  if (!isServicesRoute && !selectedSlug) {
+  if (!isServicePath && !selectedSlug) {
     return null;
   }
 

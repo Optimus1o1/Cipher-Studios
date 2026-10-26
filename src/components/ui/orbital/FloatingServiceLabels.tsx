@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { SATELLITE_CONFIGS, SatelliteConfig } from '@/components/three/satellites/types';
 import { orbitalCoordsBridge } from '@/lib/orbitalCoords';
@@ -15,9 +15,41 @@ interface FloatingServiceLabelsProps {
   heroRef?: React.RefObject<HTMLElement | null>;
 }
 
+interface ConnectorCoords {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+interface LabelCandidate {
+  slug: string;
+  config: SatelliteConfig;
+  xSat: number;
+  ySat: number;
+  targetLeft: number;
+  targetTop: number;
+  width: number;
+  height: number;
+  isVisible: boolean;
+  side: 'left' | 'right';
+  panelPos: 'beside' | 'below';
+  connector?: ConnectorCoords;
+  hiddenReason?: string;
+}
+
+interface NoGoZone {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  name: string;
+}
+
 export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
   const { hoveredSlug, setHoveredSlug, selectedSlug, isServicesRoute, selectService } = useOrbital();
   const labelRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const lineRefs = useRef<Record<string, SVGLineElement | null>>({});
 
   // 600ms mount pointer guard
   const isReadyRef = useRef(false);
@@ -51,6 +83,72 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
     };
   }, [heroRef]);
 
+  // Track no-go zones: navbar, eyebrow, headline, subtitle, hint (+16px padding)
+  const noGoZonesRef = useRef<NoGoZone[]>([]);
+
+  useEffect(() => {
+    const updateNoGoZones = () => {
+      if (typeof window === 'undefined') return;
+      const zones: NoGoZone[] = [];
+      const pad = 16;
+
+      // 1. Navigation bar
+      const nav = document.querySelector('nav') || document.querySelector('header');
+      if (nav) {
+        const r = nav.getBoundingClientRect();
+        zones.push({
+          x1: r.left - pad,
+          y1: 0,
+          x2: r.right + pad,
+          y2: r.bottom + pad,
+          name: 'navbar',
+        });
+      } else {
+        zones.push({
+          x1: 0,
+          y1: 0,
+          x2: window.innerWidth,
+          y2: 88,
+          name: 'navbar',
+        });
+      }
+
+      // 2. Hero text elements
+      const heroIds = [
+        { id: 'hero-eyebrow', name: 'eyebrow' },
+        { id: 'hero-headline', name: 'headline' },
+        { id: 'hero-subtitle', name: 'subtitle' },
+        { id: 'hero-hint', name: 'hint' },
+      ];
+
+      for (const item of heroIds) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const r = el.getBoundingClientRect();
+          zones.push({
+            x1: r.left - pad,
+            y1: r.top - pad,
+            x2: r.right + pad,
+            y2: r.bottom + pad,
+            name: item.name,
+          });
+        }
+      }
+
+      noGoZonesRef.current = zones;
+    };
+
+    updateNoGoZones();
+    const timer = setInterval(updateNoGoZones, 400);
+    window.addEventListener('resize', updateNoGoZones, { passive: true });
+    window.addEventListener('scroll', updateNoGoZones, { passive: true });
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('resize', updateNoGoZones);
+      window.removeEventListener('scroll', updateNoGoZones);
+    };
+  }, []);
+
   // Synchronize 3D projected coordinates to DOM labels at 60fps
   useEffect(() => {
     const unsubscribe = orbitalCoordsBridge.subscribe((coordsMap) => {
@@ -60,23 +158,12 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
       const viewportHeight = window.innerHeight;
       const isNarrow = viewportWidth < 900;
       const isHeroVisible = isHeroVisibleRef.current;
+      const noGoZones = noGoZonesRef.current;
+
+      // Moon disc screen radius approximation (~35% of viewport height at FOV 40)
+      const moonR = Math.round(viewportHeight * 0.33);
 
       // 1. Gather preliminary candidate coordinates for all 6 satellites
-      interface LabelCandidate {
-        slug: string;
-        config: SatelliteConfig;
-        xSat: number;
-        ySat: number;
-        dxMoon: number;
-        targetLeft: number;
-        targetTop: number;
-        width: number;
-        height: number;
-        isVisible: boolean;
-        side: 'left' | 'right';
-        panelPos: 'beside' | 'below';
-      }
-
       const candidates: LabelCandidate[] = [];
 
       for (const config of SATELLITE_CONFIGS) {
@@ -85,90 +172,206 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
 
         if (!data || !el) continue;
 
-        // Label dimensions (compact text only)
-        const w = el.offsetWidth || 160;
-        const h = el.offsetHeight || 24;
+        // Label dimensions
+        const w = el.offsetWidth || 150;
+        const h = el.offsetHeight || 22;
 
         const xSat = data.screenX;
         const ySat = data.screenY;
         const dxMoon = xSat - data.moonScreenX;
 
-        // Position 28px away from satellite on the side facing away from the Moon
-        let targetLeft: number;
-        let side: 'left' | 'right';
+        // Determine silhouette edge or fallback
+        const sil = data.silhouette || {
+          minX: xSat - 16,
+          maxX: xSat + 16,
+          minY: ySat - 16,
+          maxY: ySat + 16,
+          width: 32,
+          height: 32,
+        };
 
-        if (dxMoon >= 0) {
-          // Satellite is to the right of Moon -> place label 28px to the right
-          targetLeft = xSat + 28;
-          side = 'right';
-          // Viewport boundary flip: if it extends past right margin, flip to left side
-          if (targetLeft + w > viewportWidth - 20) {
-            targetLeft = xSat - 28 - w;
-            side = 'left';
+        // Satellite in front of Moon check
+        const isSatInFrontOfMoon =
+          data.depthZ > 0.05 &&
+          Math.hypot(xSat - data.moonScreenX, ySat - data.moonScreenY) < moonR;
+
+        // Candidate side preferences (prefer side facing away from Moon center)
+        const primarySide: 'left' | 'right' = dxMoon >= 0 ? 'right' : 'left';
+        const secondarySide: 'left' | 'right' = primarySide === 'right' ? 'left' : 'right';
+
+        // Connector line horizontal gap: 22px (ensures line length stays within 16px - 40px)
+        const connectorGap = 22;
+
+        // Helper: check if a candidate box collides with no-go zones or Moon disc
+        const checkCollision = (boxLeft: number, boxTop: number) => {
+          const boxRight = boxLeft + w;
+          const boxBottom = boxTop + h;
+
+          // Viewport margins check (at least 20px margin)
+          if (boxLeft < 20 || boxRight > viewportWidth - 20) return 'viewport-edge';
+          if (boxTop < 88 || boxBottom > viewportHeight - 20) return 'viewport-edge';
+
+          // No-go zones check (navbar, eyebrow, headline, subtitle, hint)
+          for (const zone of noGoZones) {
+            const overlapX = Math.max(boxLeft, zone.x1) < Math.min(boxRight, zone.x2);
+            const overlapY = Math.max(boxTop, zone.y1) < Math.min(boxBottom, zone.y2);
+            if (overlapX && overlapY) {
+              return `no-go-${zone.name}`;
+            }
           }
+
+          // Moon disc check: labels must not cover Moon disc unless satellite is in front
+          if (!isSatInFrontOfMoon) {
+            const nearestX = Math.max(boxLeft, Math.min(data.moonScreenX, boxRight));
+            const nearestY = Math.max(boxTop, Math.min(data.moonScreenY, boxBottom));
+            const distToMoon = Math.hypot(nearestX - data.moonScreenX, nearestY - data.moonScreenY);
+            if (distToMoon < moonR) {
+              return 'moon-disc';
+            }
+          }
+
+          return null; // No collision!
+        };
+
+        // Placement evaluation strategy:
+        // Try primary side (dy = 0)
+        // -> if collides, flip to secondary side (dy = 0)
+        // -> if collides, try vertical nudges on primary side (up to 24px: ±8, ±16, ±24)
+        // -> if collides, try vertical nudges on secondary side
+        // -> if all collide, mark hidden
+        let chosenSide: 'left' | 'right' = primarySide;
+        let chosenLeft = 0;
+        let chosenTop = 0;
+        let placementFound = false;
+        let collisionReason: string | null = null;
+
+        const verticalNudges = [0, -8, 8, -16, 16, -24, 24];
+
+        // Try primary side with 0 nudge first
+        const primaryLeft = sil.maxX + connectorGap;
+        const primaryTop = ySat - h / 2;
+        const secondaryLeft = sil.minX - connectorGap - w;
+        const secondaryTop = ySat - h / 2;
+
+        let res = checkCollision(primarySide === 'right' ? primaryLeft : secondaryLeft, primaryTop);
+        if (!res) {
+          chosenSide = primarySide;
+          chosenLeft = primarySide === 'right' ? primaryLeft : secondaryLeft;
+          chosenTop = primaryTop;
+          placementFound = true;
         } else {
-          // Satellite is to the left of Moon -> place label 28px to the left
-          targetLeft = xSat - 28 - w;
-          side = 'left';
-          // Viewport boundary flip: if it extends past left margin, flip to right side
-          if (targetLeft < 20) {
-            targetLeft = xSat + 28;
-            side = 'right';
+          // Flip side
+          const flippedSide = secondarySide;
+          const flippedLeft = flippedSide === 'right' ? primaryLeft : secondaryLeft;
+          res = checkCollision(flippedLeft, secondaryTop);
+          if (!res) {
+            chosenSide = flippedSide;
+            chosenLeft = flippedLeft;
+            chosenTop = secondaryTop;
+            placementFound = true;
+          } else {
+            // Try vertical nudges on primary side then secondary side
+            for (const dy of verticalNudges.slice(1)) {
+              const testLeft = primarySide === 'right' ? primaryLeft : secondaryLeft;
+              const testTop = primaryTop + dy;
+              if (!checkCollision(testLeft, testTop)) {
+                chosenSide = primarySide;
+                chosenLeft = testLeft;
+                chosenTop = testTop;
+                placementFound = true;
+                break;
+              }
+            }
+
+            if (!placementFound) {
+              for (const dy of verticalNudges.slice(1)) {
+                const testLeft = secondarySide === 'right' ? primaryLeft : secondaryLeft;
+                const testTop = secondaryTop + dy;
+                if (!checkCollision(testLeft, testTop)) {
+                  chosenSide = secondarySide;
+                  chosenLeft = testLeft;
+                  chosenTop = testTop;
+                  placementFound = true;
+                  break;
+                }
+              }
+            }
+
+            if (!placementFound) {
+              collisionReason = res;
+            }
           }
         }
 
-        // Center vertically on satellite
-        let targetTop = ySat - h / 2;
-        // Clamp vertically between top nav edge and bottom viewport
-        const minTop = 82;
-        const maxTop = viewportHeight - h - 16;
-        targetTop = Math.max(minTop, Math.min(maxTop, targetTop));
+        // Connector line segment calculation
+        // 1px line in satellite accent color from label inner edge to satellite silhouette nearest edge
+        let connector: ConnectorCoords | undefined;
+        if (placementFound) {
+          const innerX = chosenSide === 'right' ? chosenLeft : chosenLeft + w;
+          const innerY = chosenTop + h / 2;
+          const satEdgeX = chosenSide === 'right' ? sil.maxX : sil.minX;
+          const satEdgeY = ySat;
+
+          connector = {
+            x1: innerX,
+            y1: innerY,
+            x2: satEdgeX,
+            y2: satEdgeY,
+          };
+        }
+
+        // Visibility determination
+        let isVisible =
+          placementFound &&
+          !data.behindMoon &&
+          !data.edgeOccluded &&
+          isHeroVisible;
+
+        let hiddenReason: string | undefined;
+        if (!isVisible) {
+          if (data.behindMoon) hiddenReason = 'behind Moon';
+          else if (data.edgeOccluded) hiddenReason = 'viewport edge occluded';
+          else if (!isHeroVisible) hiddenReason = 'scrolled past hero';
+          else if (!placementFound) hiddenReason = collisionReason || 'no-go collision';
+        }
+
+        // Narrow Viewport Filter (< 900px): only active/targeted satellite label shows
+        if (isNarrow) {
+          const isTargeted = hoveredSlug === config.slug || selectedSlug === config.slug;
+          if (!isTargeted) {
+            isVisible = false;
+            hiddenReason = 'narrow viewport active only';
+          }
+        }
 
         // Determine compact panel position (beside if space allows, otherwise below)
         const panelWidth = 260;
         const hasSpaceBeside =
-          side === 'right'
-            ? targetLeft + w + panelWidth + 16 < viewportWidth
-            : targetLeft - panelWidth - 16 > 0;
+          chosenSide === 'right'
+            ? chosenLeft + w + panelWidth + 16 < viewportWidth
+            : chosenLeft - panelWidth - 16 > 0;
         const panelPos: 'beside' | 'below' = hasSpaceBeside ? 'beside' : 'below';
-
-        // Visibility rules:
-        // Hide when within 40px of any viewport edge or behind the Moon
-        const edgeOccluded =
-          xSat < 40 ||
-          xSat > viewportWidth - 40 ||
-          ySat < 40 ||
-          ySat > viewportHeight - 40;
-
-        let isVisible = !edgeOccluded && !data.behindMoon && isHeroVisible;
-
-        // Responsive Filter: Below 900px width, show only the active/targeted satellite label
-        if (isNarrow) {
-          const isTargeted =
-            hoveredSlug === config.slug || selectedSlug === config.slug;
-          if (!isTargeted) {
-            isVisible = false;
-          }
-        }
 
         candidates.push({
           slug: config.slug,
           config,
           xSat,
           ySat,
-          dxMoon,
-          targetLeft,
-          targetTop,
+          targetLeft: chosenLeft,
+          targetTop: chosenTop,
           width: w,
           height: h,
           isVisible,
-          side,
+          side: chosenSide,
           panelPos,
+          connector,
+          hiddenReason,
         });
       }
 
-      // 2. Anti-Collision: Check pairwise AABB bounding boxes of visible labels
-      // If two visible labels overlap, offset the lower one downward by up to 24px
+      // 2. Anti-Collision (Label to Label):
+      // Keep at least 8px between labels. If two collide, move lower one down by up to 24px.
+      // If still collides, hide the one farther from viewport centre.
       const visibleCandidates = candidates.filter((c) => c.isVisible);
       visibleCandidates.sort((a, b) => a.targetTop - b.targetTop);
 
@@ -176,6 +379,7 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
         for (let j = i + 1; j < visibleCandidates.length; j++) {
           const a = visibleCandidates[i];
           const b = visibleCandidates[j];
+          if (!a.isVisible || !b.isVisible) continue;
 
           // Check horizontal overlap
           const overlapX =
@@ -183,43 +387,98 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
             Math.min(a.targetLeft + a.width, b.targetLeft + b.width);
 
           if (overlapX) {
-            // Check vertical proximity/overlap
+            // Check vertical proximity (require at least 8px separation)
             const verticalDeficit = a.targetTop + a.height + 8 - b.targetTop;
             if (verticalDeficit > 0) {
-              const offset = Math.min(24, verticalDeficit);
-              b.targetTop += offset;
+              const nudge = Math.min(24, verticalDeficit);
+              const nudgedTop = b.targetTop + nudge;
+
+              // Check if nudged b is still within margins and free of no-go zones
+              let validNudge = nudgedTop + b.height <= viewportHeight - 20;
+              if (validNudge) {
+                for (const zone of noGoZones) {
+                  const ovX = Math.max(b.targetLeft, zone.x1) < Math.min(b.targetLeft + b.width, zone.x2);
+                  const ovY = Math.max(nudgedTop, zone.y1) < Math.min(nudgedTop + b.height, zone.y2);
+                  if (ovX && ovY) {
+                    validNudge = false;
+                    break;
+                  }
+                }
+              }
+
+              // Also check if nudge successfully resolved the overlap with a
+              if (validNudge && nudgedTop >= a.targetTop + a.height + 8) {
+                b.targetTop = nudgedTop;
+                if (b.connector) {
+                  b.connector.y1 = b.targetTop + b.height / 2;
+                }
+              } else {
+                // Still collides: hide the one farther from the viewport centre
+                const viewCenterX = viewportWidth / 2;
+                const viewCenterY = viewportHeight / 2;
+                const distA = Math.hypot(
+                  a.targetLeft + a.width / 2 - viewCenterX,
+                  a.targetTop + a.height / 2 - viewCenterY
+                );
+                const distB = Math.hypot(
+                  b.targetLeft + b.width / 2 - viewCenterX,
+                  b.targetTop + b.height / 2 - viewCenterY
+                );
+
+                if (distA > distB) {
+                  a.isVisible = false;
+                  a.hiddenReason = 'label-to-label collision (farther from center)';
+                } else {
+                  b.isVisible = false;
+                  b.hiddenReason = 'label-to-label collision (farther from center)';
+                }
+              }
             }
           }
         }
       }
 
-      // 3. Apply computed coordinates & visibility directly to DOM elements
-      // Dynamically order tabindex 1..N based on visual position (top-to-bottom)
-      visibleCandidates.sort((a, b) => a.targetTop - b.targetTop || a.targetLeft - b.targetLeft);
+      // 3. Apply computed coordinates, connector lines & visibility directly to DOM
+      const finalVisible = candidates.filter((c) => c.isVisible);
+      finalVisible.sort((a, b) => a.targetTop - b.targetTop || a.targetLeft - b.targetLeft);
       const visualOrderMap = new Map<string, number>();
-      visibleCandidates.forEach((c, idx) => {
+      finalVisible.forEach((c, idx) => {
         visualOrderMap.set(c.slug, idx + 1);
       });
 
       for (const item of candidates) {
         const el = labelRefs.current[item.slug];
-        if (!el) continue;
+        const line = lineRefs.current[item.slug];
 
-        // Smooth GPU transform
-        el.style.transform = `translate3d(${Math.round(item.targetLeft)}px, ${Math.round(item.targetTop)}px, 0)`;
+        if (el) {
+          el.style.transform = `translate3d(${Math.round(item.targetLeft)}px, ${Math.round(item.targetTop)}px, 0)`;
+          el.style.opacity = item.isVisible ? '1' : '0';
+          el.style.pointerEvents = item.isVisible ? 'auto' : 'none';
 
-        // Opacity transition (300ms defined in CSS)
-        el.style.opacity = item.isVisible ? '1' : '0';
-        el.style.pointerEvents = item.isVisible ? 'auto' : 'none';
+          const assignedTab = item.isVisible ? String(visualOrderMap.get(item.slug) || 1) : '-1';
+          el.setAttribute('tabindex', assignedTab);
+          el.setAttribute('aria-hidden', item.isVisible ? 'false' : 'true');
+          el.setAttribute('data-anchor-side', item.side);
+          el.setAttribute('data-panel-pos', item.panelPos);
+          if (item.hiddenReason) {
+            el.setAttribute('data-hidden-reason', item.hiddenReason);
+          } else {
+            el.removeAttribute('data-hidden-reason');
+          }
+        }
 
-        // Tab order strictly follows visual order
-        const assignedTab = item.isVisible ? String(visualOrderMap.get(item.slug) || 1) : '-1';
-        el.setAttribute('tabindex', assignedTab);
-        el.setAttribute('aria-hidden', item.isVisible ? 'false' : 'true');
-
-        // Dynamic side indicator attribute for connector styling and panel orientation
-        el.setAttribute('data-anchor-side', item.side);
-        el.setAttribute('data-panel-pos', item.panelPos);
+        // Connector line updates
+        if (line) {
+          if (item.isVisible && item.connector) {
+            line.setAttribute('x1', String(Math.round(item.connector.x1)));
+            line.setAttribute('y1', String(Math.round(item.connector.y1)));
+            line.setAttribute('x2', String(Math.round(item.connector.x2)));
+            line.setAttribute('y2', String(Math.round(item.connector.y2)));
+            line.style.opacity = '1';
+          } else {
+            line.style.opacity = '0';
+          }
+        }
       }
     });
 
@@ -251,16 +510,32 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
       className="fixed inset-0 pointer-events-none z-20 overflow-hidden"
       aria-label="Orbital Service Instruments Fleet"
     >
-      {/* Component-scoped connector line and compact panel positioning rules */}
+      {/* 1px Satellite Connector Lines rendered via SVG overlay */}
+      <svg
+        className="absolute inset-0 pointer-events-none w-full h-full z-10"
+        style={{ overflow: 'hidden' }}
+        aria-hidden="true"
+      >
+        {SATELLITE_CONFIGS.map((config) => (
+          <line
+            key={config.slug}
+            ref={(node) => {
+              lineRefs.current[config.slug] = node;
+            }}
+            data-connector-line={config.slug}
+            stroke={config.accentColor}
+            strokeWidth={1}
+            strokeOpacity={0.6}
+            style={{
+              transition: 'opacity 300ms ease-out',
+              opacity: 0,
+            }}
+          />
+        ))}
+      </svg>
+
+      {/* Component-scoped compact panel positioning rules */}
       <style jsx>{`
-        [data-anchor-side='right'] .satellite-connector-line {
-          left: -28px;
-          right: auto;
-        }
-        [data-anchor-side='left'] .satellite-connector-line {
-          right: -28px;
-          left: auto;
-        }
         [data-anchor-side='right'][data-panel-pos='beside'] .service-description-panel {
           left: calc(100% + 12px);
           right: auto;
@@ -342,23 +617,12 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
               willChange: 'transform, opacity',
             }}
           >
-            {/* 1px Connector Line linking label to satellite anchor across the 28px offset */}
+            {/* Service Name: Inter body font, sentence case, 13px, weight 500, tracking 0.02em, #ECEEF4 at 90% */}
             <span
-              className="satellite-connector-line absolute top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
+              className="block font-sans text-[13px] font-medium tracking-[0.02em] text-[#ECEEF4]/90 transition-colors duration-200 group-hover:text-white group-focus-visible:text-white [&.is-canvas-hovered]:text-white"
               style={{
-                width: '28px',
-                height: '1px',
-                backgroundColor: config.accentColor,
-                opacity: 0.85,
-              }}
-              aria-hidden="true"
-            />
-
-            {/* Service Name: Small uppercase monospace, 0.12em tracking, #ECEEF4 at 85% opacity, soft text shadow */}
-            <span
-              className="block font-mono text-[11px] sm:text-[12px] uppercase tracking-[0.12em] text-[#ECEEF4]/85 transition-colors duration-200 group-hover:text-white group-focus-visible:text-white [&.is-canvas-hovered]:text-white"
-              style={{
-                textShadow: '0 1px 4px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 0, 0, 0.70)',
+                textTransform: 'none',
+                textShadow: '0 1px 8px rgba(5, 6, 13, 0.9)',
               }}
             >
               {title}
