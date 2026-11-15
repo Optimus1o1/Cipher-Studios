@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { REVIEW_BUDGETS, REVIEW_GOALS, TRACKING_KEYS, reviewFormSchema } from '@/lib/validation';
+import { TurnstileWidget, TurnstileWidgetRef } from '@/components/ui/TurnstileWidget';
 
 const fieldBase =
   'w-full bg-bg-surface border border-line focus:border-accent text-ink rounded-input px-4 py-3 text-[1rem] outline-none transition-colors placeholder:text-mute/60';
@@ -54,6 +55,8 @@ export function ReviewForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   const set = (name: keyof FormState, value: string | boolean) => {
     setData((prev) => ({ ...prev, [name]: value }));
@@ -84,6 +87,11 @@ export function ReviewForm() {
     e.preventDefault();
     setServerError('');
 
+    if (!turnstileToken) {
+      setServerError('Please complete the security verification below before submitting.');
+      return;
+    }
+
     const payload = {
       name: data.name,
       email: data.email,
@@ -93,6 +101,7 @@ export function ReviewForm() {
       budget: data.budget || undefined,
       message: data.message,
       honeypot: data.honeypot,
+      turnstileToken,
     };
 
     const result = reviewFormSchema.safeParse(payload);
@@ -125,6 +134,8 @@ export function ReviewForm() {
       router.push('/website-review/thank-you');
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
       setSubmitting(false);
     }
   };
@@ -258,6 +269,20 @@ export function ReviewForm() {
         />
         {fieldError('message')}
       </div>
+
+      {/* Cloudflare Turnstile Bot Defense */}
+      <TurnstileWidget
+        ref={turnstileRef}
+        action="review_submission"
+        onVerify={(token) => {
+          setTurnstileToken(token);
+          if (serverError.includes('security verification')) {
+            setServerError('');
+          }
+        }}
+        onExpire={() => setTurnstileToken('')}
+        onError={() => setTurnstileToken('')}
+      />
 
       {serverError && (
         <div role="alert" className="flex items-start gap-3 rounded-input border border-red-400/30 bg-red-400/5 p-4 text-sm text-red-200">

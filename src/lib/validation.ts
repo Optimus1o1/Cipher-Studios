@@ -6,6 +6,7 @@ export const contactFormSchema = z.object({
   service: z.string().min(1, 'Please select what service you need'),
   message: z.string().trim().min(10, 'Please tell us a bit more about your project (at least 10 characters)').max(3000, 'Message is too long'),
   honeypot: z.string().max(0, 'Bot submission rejected').optional(),
+  turnstileToken: z.string().min(1, 'Security verification required').max(2048, 'Token invalid'),
 });
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;
@@ -49,11 +50,12 @@ export const reviewFormSchema = z
     email: z.string().trim().email('Please enter a valid email address'),
     hasWebsite: z.boolean(),
     website: z.string().trim().max(300, 'Website address is too long').optional().default(''),
-    goal: z.enum(REVIEW_GOALS, { errorMap: () => ({ message: 'Please choose your main goal' }) }),
+    goal: z.enum(REVIEW_GOALS, { message: 'Please choose your main goal' }),
     budget: z.enum(REVIEW_BUDGETS).optional(),
     message: z.string().trim().max(2000, 'Message is too long').optional().default(''),
     tracking: z.record(z.enum(TRACKING_KEYS), z.string().max(100)).optional(),
     honeypot: z.string().max(0, 'Bot submission rejected').optional(),
+    turnstileToken: z.string().min(1, 'Security verification required').max(2048, 'Token invalid'),
   })
   .superRefine((v, ctx) => {
     if (v.hasWebsite && !normalizeWebsite(v.website)) {

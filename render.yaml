@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: moon-sanctum-labs
+    runtime: node
+    region: singapore
+    plan: starter # Starter plan ($7/mo) recommended over Free to prevent spin-down delays
+    buildCommand: npm ci && npm run build
+    startCommand: npm start -- --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false # Set in Render Dashboard
+      - key: SUPABASE_SECRET_KEY
+        sync: false # Set in Render Dashboard (Secret)
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false # Set in Render Dashboard
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false # Set in Render Dashboard (Secret)
+      - key: IP_HASH_SECRET
+        sync: false # Set in Render Dashboard (Secret)
+      - key: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        sync: false # Set in Render Dashboard (Required at build time)
+      - key: TURNSTILE_SECRET_KEY
+        sync: false # Set in Render Dashboard (Secret)
+      - key: RESEND_API_KEY
+        sync: false # Set in Render Dashboard (Secret)
+      - key: EMAIL_FROM
+        sync: false # Set in Render Dashboard
+      - key: LEAD_NOTIFY_EMAIL
+        sync: false # Set in Render Dashboard
+      - key: NEXT_PUBLIC_BOOKING_URL
+        sync: false # Optional, set in Render Dashboard

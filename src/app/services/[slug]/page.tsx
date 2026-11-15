@@ -11,9 +11,9 @@ import { processSteps } from '@/data/process';
 import { SATELLITE_CONFIGS } from '@/data/satellites';
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export function generateStaticParams() {
@@ -22,8 +22,9 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const service = servicesData.find((s) => s.slug === params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const service = servicesData.find((s) => s.slug === slug);
   if (!service) {
     return {
       title: 'Service Not Found | Moon Sanctum Labs',
@@ -40,15 +41,16 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function ServiceDetailPage({ params }: Props) {
-  const serviceIndex = servicesData.findIndex((s) => s.slug === params.slug);
+export default async function ServiceDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const serviceIndex = servicesData.findIndex((s) => s.slug === slug);
   if (serviceIndex === -1) {
     notFound();
   }
 
   const service = servicesData[serviceIndex];
   const nextService = servicesData[(serviceIndex + 1) % servicesData.length];
-  const satellite = SATELLITE_CONFIGS.find((s) => s.slug === params.slug);
+  const satellite = SATELLITE_CONFIGS.find((s) => s.slug === slug);
 
   return (
     <div className="relative z-20 w-full pt-28 pb-20 pointer-events-auto">

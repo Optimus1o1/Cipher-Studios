@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Mail, MapPin, Clock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/glass/GlassCard';
 import { servicesData } from '@/data/services';
 import { contactFormSchema } from '@/lib/validation';
+import { TurnstileWidget, TurnstileWidgetRef } from '@/components/ui/TurnstileWidget';
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -21,6 +22,9 @@ function ContactForm() {
     message: '',
     honeypot: '',
   });
+
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,12 +58,23 @@ function ContactForm() {
     setErrorMessage('');
     setFieldErrors({});
 
+    if (!turnstileToken) {
+      setSubmitStatus('error');
+      setErrorMessage('Please complete the security verification below before submitting.');
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      turnstileToken,
+    };
+
     // Client-side Zod validation
-    const result = contactFormSchema.safeParse(formData);
+    const result = contactFormSchema.safeParse(payload);
     if (!result.success) {
       const errors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        const fieldName = err.path[0] as string;
+      result.error.issues.forEach((err) => {
+        const fieldName = String(err.path[0] ?? '');
         if (fieldName && !errors[fieldName]) {
           errors[fieldName] = err.message;
         }
@@ -74,7 +89,7 @@ function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -91,11 +106,15 @@ function ContactForm() {
         message: '',
         honeypot: '',
       });
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
     } catch (err: unknown) {
       setSubmitStatus('error');
       setErrorMessage(
         err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
       );
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -233,6 +252,21 @@ function ContactForm() {
           </div>
         </div>
       )}
+
+      {/* Cloudflare Turnstile Bot Defense */}
+      <TurnstileWidget
+        ref={turnstileRef}
+        action="contact_submission"
+        onVerify={(token) => {
+          setTurnstileToken(token);
+          if (submitStatus === 'error' && errorMessage.includes('security verification')) {
+            setSubmitStatus('idle');
+            setErrorMessage('');
+          }
+        }}
+        onExpire={() => setTurnstileToken('')}
+        onError={() => setTurnstileToken('')}
+      />
 
       {/* Submit button */}
       <div className="pt-2">
