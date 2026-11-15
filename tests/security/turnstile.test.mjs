@@ -6,6 +6,7 @@ const PRODUCTION_ALLOWED_HOSTNAMES = new Set([
   'moonsanctumlabs.design',
   'www.moonsanctumlabs.design',
   'moon-sanctum-labs.onrender.com',
+  'moon-sanctum-labs-slsj.onrender.com',
 ]);
 
 const DEV_ALLOWED_HOSTNAMES = new Set([
