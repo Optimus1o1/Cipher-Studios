@@ -4,7 +4,7 @@ services:
     runtime: node
     region: singapore
     plan: free # Initial staging deployment on Free plan ($0/mo)
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start -- --hostname 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
