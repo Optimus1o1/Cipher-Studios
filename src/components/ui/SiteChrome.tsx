@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { Navigation } from './Navigation';
 import { Footer } from './Footer';
+import { SceneErrorBoundary } from './SceneErrorBoundary';
 
 const MoonScene = dynamic(
   () => import('@/components/three/MoonScene').then((mod) => mod.MoonScene),
@@ -34,7 +35,9 @@ export function TopChrome() {
   const bare = isBare(pathname);
   return (
     <>
-      <MoonScene />
+      <SceneErrorBoundary>
+        <MoonScene />
+      </SceneErrorBoundary>
       {!bare && <Navigation />}
     </>
   );
