@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const URL = 'https://moon-sanctum-labs-slsj.onrender.com/';
+const URL = process.env.LIVE_URL || 'https://moonsanctumlabs.design/';
 
 async function checkLiveMoon() {
   console.log('Testing live staging Moon Sanctum Labs at:', URL);
