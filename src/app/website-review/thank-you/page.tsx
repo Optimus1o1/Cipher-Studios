@@ -12,7 +12,7 @@ export default function ThankYouPage() {
   const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL;
 
   return (
-    <div className="min-h-[100svh] flex items-center py-24" style={{ background: 'radial-gradient(ellipse at 70% 30%, #0f1430 0%, #05060d 70%)' }}>
+    <div className="relative z-20 w-full min-h-[100svh] flex items-center py-24 pointer-events-auto" style={{ background: 'radial-gradient(ellipse at 70% 30%, #0f1430 0%, #05060d 70%)' }}>
       <div className="max-w-content mx-auto px-6 md:px-8 w-full">
         <div className="max-w-[640px] space-y-8">
           <Link href="/" className="inline-block text-mute hover:text-ink transition-colors text-sm">

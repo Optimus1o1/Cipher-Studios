@@ -141,7 +141,7 @@ export function ReviewForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5 sm:space-y-6 pointer-events-auto">
       {/* Honeypot: hidden from people, tempting to bots */}
       <div className="hidden" aria-hidden="true">
         <label htmlFor="honeypot">Leave this blank</label>
@@ -156,7 +156,7 @@ export function ReviewForm() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label htmlFor="name" className="block text-sm text-mute mb-2">
             Your name
@@ -214,7 +214,7 @@ export function ReviewForm() {
         </label>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label htmlFor="goal" className="block text-sm text-mute mb-2">
             Your main goal
@@ -292,7 +292,7 @@ export function ReviewForm() {
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <Button type="submit" size="lg" disabled={submitting}>
+        <Button type="submit" size="lg" disabled={submitting} className="w-full sm:w-auto min-w-[200px] justify-center">
           {submitting ? (
             <>
               <Loader2 className="size-5 mr-2 animate-spin" />

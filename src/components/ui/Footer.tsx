@@ -26,13 +26,13 @@ export function Footer() {
             <p className="text-mute leading-relaxed">
               Kolkata, India. Working with founders and businesses worldwide.
             </p>
-            <p>
-              <a
-                href="mailto:hello@moonsanctumlabs.com"
-                className="text-ink hover:text-accent transition-colors"
+            <p className="pt-1">
+              <Link
+                href="/contact"
+                className="text-ink hover:text-accent transition-colors font-medium"
               >
-                hello@moonsanctumlabs.com
-              </a>
+                Start a project inquiry &rarr;
+              </Link>
             </p>
           </div>
 

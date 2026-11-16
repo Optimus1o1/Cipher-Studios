@@ -293,7 +293,7 @@ function ContactForm() {
 
 export default function ContactPage() {
   return (
-    <div className="w-full pt-28 pb-20">
+    <div className="relative z-20 w-full pt-28 pb-20 pointer-events-auto">
       <Section veil={false} className="py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.3fr] gap-12 lg:gap-16 items-start">
           {/* Left Column: Heading and Context */}
@@ -330,13 +330,10 @@ export default function ContactPage() {
               <div className="flex items-start gap-3.5">
                 <Mail className="size-5 text-accent shrink-0 mt-1" />
                 <div>
-                  <h4 className="text-ink font-medium text-sm">Direct Contact</h4>
-                  <a
-                    href="mailto:hello@moonsanctumlabs.com"
-                    className="text-accent hover:underline text-sm mt-0.5 inline-block"
-                  >
-                    hello@moonsanctumlabs.com
-                  </a>
+                  <h4 className="text-ink font-medium text-sm">Online Inquiries</h4>
+                  <p className="text-mute text-sm mt-0.5">
+                    Submissions are routed directly to our studio lead and answered within 24 hours.
+                  </p>
                 </div>
               </div>
 

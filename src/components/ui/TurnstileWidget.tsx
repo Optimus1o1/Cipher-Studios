@@ -41,6 +41,14 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
 
+    // Keep callback refs stable across parent re-renders so form keystrokes never recreate the widget
+    const onVerifyRef = useRef(onVerify);
+    onVerifyRef.current = onVerify;
+    const onExpireRef = useRef(onExpire);
+    onExpireRef.current = onExpire;
+    const onErrorRef = useRef(onError);
+    onErrorRef.current = onError;
+
     const siteKey =
       process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 
@@ -54,19 +62,19 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
           theme: 'dark',
           size: 'normal',
           callback: (token: string) => {
-            onVerify(token);
+            onVerifyRef.current(token);
           },
           'expired-callback': () => {
-            onExpire?.();
+            onExpireRef.current?.();
           },
           'error-callback': () => {
-            onError?.();
+            onErrorRef.current?.();
           },
         });
       } catch (err) {
         console.error('[Turnstile] Render error:', err);
       }
-    }, [siteKey, action, onVerify, onExpire, onError]);
+    }, [siteKey, action]);
 
     useImperativeHandle(ref, () => ({
       reset: () => {
@@ -81,44 +89,43 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
     }));
 
     useEffect(() => {
-      // If turnstile is already loaded on window
-      if (window.turnstile) {
-        renderWidget();
-        return () => {
-          if (widgetIdRef.current && window.turnstile) {
-            try {
-              window.turnstile.remove(widgetIdRef.current);
-            } catch (e) {
-              // Ignore removal errors on unmount
-            }
-            widgetIdRef.current = null;
-          }
-        };
-      }
+      let isMounted = true;
 
-      // Check if script is already present in document
-      let script = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'cf-turnstile-script';
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      }
-
-      const prevCallback = window.onloadTurnstileCallback;
-      window.onloadTurnstileCallback = () => {
-        if (prevCallback) prevCallback();
+      const tryRender = () => {
+        if (!isMounted) return;
         renderWidget();
       };
 
+      // If turnstile script is already available on window
+      if (window.turnstile) {
+        tryRender();
+      } else {
+        // Ensure Cloudflare API script is present in document
+        let script = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
+        if (!script) {
+          script = document.createElement('script');
+          script.id = 'cf-turnstile-script';
+          script.src =
+            'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
+          script.async = true;
+          script.defer = true;
+          document.head.appendChild(script);
+        }
+
+        const prevCallback = window.onloadTurnstileCallback;
+        window.onloadTurnstileCallback = () => {
+          if (typeof prevCallback === 'function') prevCallback();
+          tryRender();
+        };
+      }
+
       return () => {
+        isMounted = false;
         if (widgetIdRef.current && window.turnstile) {
           try {
             window.turnstile.remove(widgetIdRef.current);
           } catch (e) {
-            // Ignore
+            // Ignore removal errors on unmount
           }
           widgetIdRef.current = null;
         }

@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'Moon Sanctum Labs',
   ],
   authors: [{ name: 'Moon Sanctum Labs' }],
-  metadataBase: new URL('https://moonsanctumlabs.com'),
+  metadataBase: new URL('https://moonsanctumlabs.design'),
   openGraph: {
     title: 'Moon Sanctum Labs — Decode. Build. Evolve.',
     description:

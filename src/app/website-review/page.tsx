@@ -65,33 +65,33 @@ function Logo() {
 
 export default function WebsiteReviewPage() {
   return (
-    <div className="w-full">
-      {/* Minimal header: logo and return action */}
-      <header className="absolute top-0 inset-x-0 z-20">
-        <div className="max-w-content mx-auto px-6 md:px-8 h-[72px] flex items-center justify-between">
+    <div className="relative z-20 w-full pointer-events-auto">
+      {/* Sticky header: logo and return action permanently accessible */}
+      <header className="sticky top-0 inset-x-0 z-30 bg-bg/85 backdrop-blur-md border-b border-line/40 pointer-events-auto">
+        <div className="max-w-content mx-auto px-4 sm:px-6 md:px-8 h-[64px] sm:h-[72px] flex items-center justify-between">
           <Logo />
-          <Button href="/" size="sm" variant="secondary">
+          <Button href="/" size="sm" variant="secondary" className="px-3 sm:px-4 text-[0.82rem] sm:text-[0.88rem]">
             Back to home
           </Button>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative min-h-[100svh] flex items-center pt-28 pb-20">
-        <div className="max-w-content mx-auto px-6 md:px-8 w-full">
-          <div className="max-w-[720px] space-y-7">
-            <h1 className="font-serif font-light text-ink text-[2.6rem] sm:text-[3.6rem] md:text-[4.6rem] leading-[1.05] tracking-[-0.03em]">
+      <section className="relative min-h-[85svh] flex items-center pt-16 sm:pt-20 pb-16">
+        <div className="max-w-content mx-auto px-4 sm:px-6 md:px-8 w-full">
+          <div className="max-w-[720px] space-y-6 sm:space-y-7">
+            <h1 className="font-serif font-light text-ink text-[2.1rem] sm:text-[3.2rem] md:text-[4.2rem] leading-[1.08] tracking-[-0.03em] break-words">
               A free review of your website, from a senior team.
             </h1>
-            <p className="text-mute text-[1.12rem] md:text-[1.2rem] leading-relaxed max-w-[52ch]">
+            <p className="text-mute text-[1.05rem] sm:text-[1.15rem] leading-relaxed max-w-[52ch]">
               Send us your site address. Within {REVIEW_TURNAROUND} you will get an honest review of its speed, search
               visibility and enquiry flow, with the three fixes worth doing first.
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2">
-              <Button href="#review" size="lg" variant="primary">
+              <Button href="#review" size="lg" variant="primary" className="w-full sm:w-auto justify-center">
                 Get my free review
               </Button>
-              <span className="text-mute text-[0.95rem]">Free, no obligation, no sales pressure.</span>
+              <span className="text-mute text-[0.92rem]">Free, no obligation, no sales pressure.</span>
             </div>
           </div>
         </div>
@@ -99,12 +99,12 @@ export default function WebsiteReviewPage() {
 
       {/* The problem */}
       <Section veil={false} className="bg-bg">
-        <h2 className="font-serif font-light text-ink text-[2rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[20ch] mb-12">
+        <h2 className="font-serif font-light text-ink text-[1.8rem] sm:text-[2.4rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[20ch] mb-10 sm:mb-12">
           Most business websites lose customers in the same three ways.
         </h2>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-8 list-none p-0 m-0">
           {problems.map((p) => (
-            <li key={p} className="border-t border-line pt-6 text-ink text-[1.08rem] leading-relaxed">
+            <li key={p} className="border-t border-line pt-6 text-ink text-[1.05rem] sm:text-[1.08rem] leading-relaxed">
               {p}
             </li>
           ))}
@@ -113,13 +113,13 @@ export default function WebsiteReviewPage() {
 
       {/* What you get */}
       <Section veil={false} className="bg-bg-surface/40">
-        <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-12">
-          <h2 className="font-serif font-light text-ink text-[2rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[14ch]">
+        <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-10 md:gap-12">
+          <h2 className="font-serif font-light text-ink text-[1.8rem] sm:text-[2.4rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[14ch]">
             What is in your review.
           </h2>
           <ul className="list-none p-0 m-0 divide-y divide-line border-y border-line">
             {included.map((item) => (
-              <li key={item} className="py-5 text-ink text-[1.08rem]">
+              <li key={item} className="py-5 text-ink text-[1.05rem] sm:text-[1.08rem]">
                 {item}
               </li>
             ))}
@@ -129,15 +129,15 @@ export default function WebsiteReviewPage() {
 
       {/* How it works */}
       <Section veil={false} className="bg-bg">
-        <h2 className="font-serif font-light text-ink text-[2rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] mb-12">
+        <h2 className="font-serif font-light text-ink text-[1.8rem] sm:text-[2.4rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] mb-10 sm:mb-12">
           Three simple steps.
         </h2>
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-10 list-none p-0 m-0">
+        <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 list-none p-0 m-0">
           {steps.map((s, i) => (
             <li key={s.title} className="border-t border-line pt-6 space-y-3">
               <span className="text-accent font-mono text-sm">0{i + 1}</span>
-              <h3 className="font-serif font-light text-ink text-[1.5rem]">{s.title}</h3>
-              <p className="text-mute text-[0.98rem] leading-relaxed">{s.body}</p>
+              <h3 className="font-serif font-light text-ink text-[1.4rem] sm:text-[1.5rem]">{s.title}</h3>
+              <p className="text-mute text-[0.95rem] sm:text-[0.98rem] leading-relaxed">{s.body}</p>
             </li>
           ))}
         </ol>
@@ -145,19 +145,19 @@ export default function WebsiteReviewPage() {
 
       {/* Who it is for */}
       <Section veil={false} className="bg-bg-surface/40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12">
           <div className="space-y-4">
-            <h2 className="font-serif font-light text-ink text-[1.7rem] md:text-[2.2rem] leading-tight">A good fit if</h2>
-            <p className="text-mute text-[1.05rem] leading-relaxed max-w-[44ch]">
+            <h2 className="font-serif font-light text-ink text-[1.6rem] sm:text-[1.9rem] md:text-[2.2rem] leading-tight">A good fit if</h2>
+            <p className="text-mute text-[1rem] sm:text-[1.05rem] leading-relaxed max-w-[44ch]">
               You run a business or startup, you have a website (or are about to build one), and you want clear advice
               from a person who will tell you the truth.
             </p>
           </div>
           <div className="space-y-4">
-            <h2 className="font-serif font-light text-ink text-[1.7rem] md:text-[2.2rem] leading-tight">
+            <h2 className="font-serif font-light text-ink text-[1.6rem] sm:text-[1.9rem] md:text-[2.2rem] leading-tight">
               Probably not a fit if
             </h2>
-            <p className="text-mute text-[1.05rem] leading-relaxed max-w-[44ch]">
+            <p className="text-mute text-[1rem] sm:text-[1.05rem] leading-relaxed max-w-[44ch]">
               You want the cheapest possible template site, or an automated report with no human advice.
             </p>
           </div>
@@ -169,19 +169,19 @@ export default function WebsiteReviewPage() {
       {/* FAQ */}
       <Section veil={false} className="bg-bg">
         <div className="max-w-[820px]">
-          <h2 className="font-serif font-light text-ink text-[2rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] mb-10">
+          <h2 className="font-serif font-light text-ink text-[1.8rem] sm:text-[2.4rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] mb-8 sm:mb-10">
             Questions
           </h2>
           <div className="divide-y divide-line border-y border-line">
             {faqs.map((f) => (
-              <details key={f.q} className="group py-6">
-                <summary className="flex items-center justify-between gap-6 cursor-pointer list-none font-serif font-light text-ink text-[1.3rem] [&::-webkit-details-marker]:hidden">
+              <details key={f.q} className="group py-5 sm:py-6">
+                <summary className="flex items-center justify-between gap-6 cursor-pointer list-none font-serif font-light text-ink text-[1.18rem] sm:text-[1.3rem] [&::-webkit-details-marker]:hidden">
                   {f.q}
                   <span className="text-accent text-2xl leading-none transition-transform group-open:rotate-45" aria-hidden="true">
                     +
                   </span>
                 </summary>
-                <p className="mt-4 text-mute leading-relaxed max-w-[60ch]">{f.a}</p>
+                <p className="mt-4 text-mute leading-relaxed max-w-[60ch] text-[0.98rem] sm:text-[1rem]">{f.a}</p>
               </details>
             ))}
           </div>
@@ -189,13 +189,13 @@ export default function WebsiteReviewPage() {
       </Section>
 
       {/* Form */}
-      <Section id="review" veil={false} className="bg-bg-surface/60">
-        <div className="grid grid-cols-1 md:grid-cols-[0.8fr_1.2fr] gap-12 md:gap-16">
-          <div className="space-y-5">
-            <h2 className="font-serif font-light text-ink text-[2.2rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[12ch]">
+      <Section id="review" veil={false} className="bg-bg-surface/60 py-12 sm:py-20 md:py-28">
+        <div className="grid grid-cols-1 md:grid-cols-[0.8fr_1.2fr] gap-8 md:gap-16">
+          <div className="space-y-4 sm:space-y-5">
+            <h2 className="font-serif font-light text-ink text-[2rem] sm:text-[2.6rem] md:text-[3rem] leading-[1.1] tracking-[-0.025em] max-w-[12ch]">
               Get your free review.
             </h2>
-            <p className="text-mute text-[1.05rem] leading-relaxed max-w-[38ch]">
+            <p className="text-mute text-[1rem] sm:text-[1.05rem] leading-relaxed max-w-[38ch]">
               Tell us where to look and what you want from your site. We will take it from there.
             </p>
           </div>
@@ -204,12 +204,10 @@ export default function WebsiteReviewPage() {
       </Section>
 
       {/* Minimal footer */}
-      <footer className="bg-bg border-t border-line py-10 text-mute text-sm">
-        <div className="max-w-content mx-auto px-6 md:px-8 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+      <footer className="bg-bg border-t border-line py-8 sm:py-10 text-mute text-sm">
+        <div className="max-w-content mx-auto px-4 sm:px-6 md:px-8 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} Moon Sanctum Labs. Kolkata, India.</p>
-          <a href="mailto:hello@moonsanctumlabs.com" className="hover:text-ink transition-colors">
-            hello@moonsanctumlabs.com
-          </a>
+          <p className="text-mute text-xs sm:text-sm">Decode. Build. Evolve.</p>
         </div>
       </footer>
     </div>
