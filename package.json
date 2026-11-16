@@ -13,12 +13,11 @@
   },
   "dependencies": {
     "@biomejs/biome": "^2.6.8",
-    "@react-three/drei": "^9.106.0",
-    "@react-three/fiber": "^8.16.8",
+    "@react-three/fiber": "^9.8.2",
     "@supabase/supabase-js": "^2.119.0",
     "@types/node": "^20.14.2",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/three": "^0.165.0",
     "@upstash/ratelimit": "^2.2.1",
     "@upstash/redis": "^1.41.0",
@@ -28,14 +27,13 @@
     "lucide-react": "^0.395.0",
     "next": "^16.4.6",
     "postcss": "^8.4.38",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss": "^3.4.4",
     "three": "^0.165.0",
     "typescript": "^5.4.5",
     "zod": "^4.6.7"
-  },
-  "devDependencies": {}
+  }
 }
