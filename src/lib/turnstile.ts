@@ -14,7 +14,6 @@ const TURNSTILE_VERIFY_ENDPOINT = 'https://challenges.cloudflare.com/turnstile/v
 const PRODUCTION_ALLOWED_HOSTNAMES = new Set([
   'moonsanctumlabs.design',
   'www.moonsanctumlabs.design',
-  'moon-sanctum-labs.onrender.com',
   'moon-sanctum-labs-slsj.onrender.com',
 ]);
 
