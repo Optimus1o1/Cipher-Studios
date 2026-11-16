@@ -121,6 +121,16 @@ export async function POST(req: NextRequest) {
     const rateResult = await checkRateLimit(`contact:${clientHash}`, 5, 10 * 60 * 1000);
     const isDegradedMode = Boolean(rateResult.degraded);
 
+    if (isDegradedMode) {
+      console.warn(
+        '[OPERATIONAL_WARNING] Contact rate limiting degraded mode active (Redis unreachable). Distributed rate limiting is NOT operational; relying on Turnstile bot verification.',
+        {
+          hashPrefix: clientHash.slice(0, 8),
+          timestamp: new Date().toISOString(),
+        }
+      );
+    }
+
     if (!rateResult.success && !isDegradedMode) {
       const retryAfterSeconds = Math.max(1, Math.ceil((rateResult.reset - Date.now()) / 1000));
       return NextResponse.json(
