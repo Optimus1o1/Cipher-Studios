@@ -97,6 +97,10 @@ export async function verifyTurnstileToken(
     if (hostname) {
       const isProduction = process.env.NODE_ENV === 'production';
       let isAllowed = PRODUCTION_ALLOWED_HOSTNAMES.has(hostname);
+      // In staging or testing mode when using Cloudflare's official dummy test keys, accept example.com
+      if (secret.startsWith('1x000000') || data.metadata?.result_with_testing_key) {
+        isAllowed = isAllowed || hostname === 'example.com';
+      }
       if (!isProduction) {
         isAllowed = isAllowed || DEV_ALLOWED_HOSTNAMES.has(hostname);
       }
