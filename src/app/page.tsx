@@ -17,9 +17,9 @@ export default function HomePage() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="min-h-[100svh] flex items-center pt-28 pb-20 relative">
-        <div className="max-w-content mx-auto px-6 md:px-8 w-full">
-          <div className="max-w-[760px] space-y-6">
+      <section className="min-h-[100svh] flex items-center pt-28 pb-20 relative pointer-events-none">
+        <div className="max-w-content mx-auto px-6 md:px-8 w-full pointer-events-none">
+          <div className="max-w-[760px] space-y-6 pointer-events-auto">
             <div className="pb-1">
               <LunarTelemetryBadge />
             </div>
@@ -55,7 +55,7 @@ export default function HomePage() {
       </section>
 
       {/* Credibility & Glass UI Stat Highlights */}
-      <section className="relative z-10 py-12 border-t border-line bg-bg-surface/50 backdrop-blur-md">
+      <section className="relative z-10 py-12 border-t border-line bg-bg-surface/50 backdrop-blur-md pointer-events-auto">
         <div className="max-w-content mx-auto px-6 md:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
@@ -92,7 +92,7 @@ export default function HomePage() {
       </section>
 
       {/* Services Band */}
-      <Section id="services" borderTop={true}>
+      <Section id="services" borderTop={true} className="pointer-events-auto">
         <SectionHeading
           tag="Our Services"
           title="Six services, one team, one standard."
@@ -122,7 +122,7 @@ export default function HomePage() {
       </Section>
 
       {/* Process Section */}
-      <Section id="process" borderTop={true}>
+      <Section id="process" borderTop={true} className="pointer-events-auto">
         <SectionHeading
           tag="How We Work"
           title="A calm, clear path from first call to launch."
@@ -150,7 +150,7 @@ export default function HomePage() {
       </Section>
 
       {/* Principles Section */}
-      <Section id="principles" borderTop={true}>
+      <Section id="principles" borderTop={true} className="pointer-events-auto">
         <SectionHeading
           tag="Our Commitments"
           title="How we work, in three promises."
@@ -179,7 +179,7 @@ export default function HomePage() {
       </Section>
 
       {/* CTA Band */}
-      <Section id="contact-banner" borderTop={true} className="bg-veil-deep">
+      <Section id="contact-banner" borderTop={true} className="bg-veil-deep pointer-events-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div className="space-y-4">
             <span className="text-accent text-[0.92rem] uppercase tracking-wider font-medium">

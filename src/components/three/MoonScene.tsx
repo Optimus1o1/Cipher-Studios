@@ -12,6 +12,7 @@ export function MoonScene() {
   const tier = useDeviceTier();
   const pathname = usePathname();
   const isServicePage = pathname === '/services' || pathname.startsWith('/services/');
+  const isInteractive3DRoute = pathname === '/' || isServicePage;
 
   useEffect(() => {
     setMounted(true);
@@ -45,7 +46,7 @@ export function MoonScene() {
     <div
       className={cn(
         'fixed inset-0 z-0 overflow-hidden',
-        isServicePage ? 'pointer-events-auto' : 'pointer-events-none'
+        isInteractive3DRoute ? 'pointer-events-auto' : 'pointer-events-none'
       )}
       style={{
         background: 'radial-gradient(ellipse at 75% 30%, #0f1430 0%, #05060d 75%)',
@@ -66,7 +67,7 @@ export function MoonScene() {
         style={{
           width: '100%',
           height: '100%',
-          pointerEvents: isServicePage ? 'auto' : 'none',
+          pointerEvents: isInteractive3DRoute ? 'auto' : 'none',
           touchAction: 'pan-y',
         }}
       >
