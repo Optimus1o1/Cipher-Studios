@@ -54,25 +54,38 @@ export function Navigation() {
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-8 text-[0.93rem]">
             <Link
-              href="/services"
+              href="/"
               className={cn(
-                'transition-colors duration-200',
-                pathname === '/services' || pathname.startsWith('/services/')
-                  ? 'text-ink font-medium'
+                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm',
+                pathname === '/'
+                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
                   : 'text-mute hover:text-ink'
               )}
+              aria-current={pathname === '/' ? 'page' : undefined}
+            >
+              Home
+            </Link>
+            <Link
+              href="/services"
+              className={cn(
+                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm',
+                pathname === '/services' || pathname.startsWith('/services/')
+                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
+                  : 'text-mute hover:text-ink'
+              )}
+              aria-current={pathname === '/services' || pathname.startsWith('/services/') ? 'page' : undefined}
             >
               Services
             </Link>
             <Link
               href="/#process"
-              className="text-mute hover:text-ink transition-colors duration-200"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
             >
               Process
             </Link>
             <Link
               href="/#principles"
-              className="text-mute hover:text-ink transition-colors duration-200"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
             >
               Principles
             </Link>
@@ -112,31 +125,54 @@ export function Navigation() {
         >
           <div className="flex flex-col space-y-3 text-[1.05rem]">
             <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'px-3 py-2 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
+                pathname === '/'
+                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
+                  : 'text-mute hover:text-ink'
+              )}
+              aria-current={pathname === '/' ? 'page' : undefined}
+            >
+              Home
+            </Link>
+            <Link
               href="/services"
-              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'px-3 py-2 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
+                pathname === '/services' || pathname.startsWith('/services/')
+                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
+                  : 'text-mute hover:text-ink'
+              )}
+              aria-current={pathname === '/services' || pathname.startsWith('/services/') ? 'page' : undefined}
             >
               Services
             </Link>
             <Link
               href="/#process"
-              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper"
             >
               Process
             </Link>
             <Link
               href="/#principles"
-              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper"
             >
               Principles
             </Link>
             <div className="pt-2 flex flex-col gap-2">
-              <Button href="/contact" variant="primary" className="w-full">
+              <Button href="/contact" variant="primary" className="w-full" onClick={() => setMobileOpen(false)}>
                 Start a project
               </Button>
               <Button
                 href="/website-review?utm_source=msl-site&utm_medium=internal&utm_campaign=header-button"
                 variant="secondary"
                 className="w-full"
+                onClick={() => setMobileOpen(false)}
               >
                 Free website review
               </Button>

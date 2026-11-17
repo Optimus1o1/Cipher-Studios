@@ -19,6 +19,7 @@ const config: Config = {
         },
         ink: {
           DEFAULT: '#eceef4',
+          bone: '#f2efe8',
           light: '#07080f',
           muted: '#8e95aa',
         },
@@ -52,6 +53,8 @@ const config: Config = {
       fontFamily: {
         serif: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
         sans: ['var(--font-inter)', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'Manrope', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         input: '12px',
@@ -70,6 +73,7 @@ const config: Config = {
       },
       maxWidth: {
         content: '1100px',
+        editorial: '1240px',
       },
       screens: {
         sm: '640px',

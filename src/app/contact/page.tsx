@@ -236,8 +236,8 @@ function ContactForm() {
           <div>
             <p className="font-medium">Details received successfully.</p>
             <p className="text-emerald-300/80 mt-1">
-              Thank you for reaching out. We will review your requirements and
-              reply to your email within one business day.
+              Thank you for reaching out. We review every inquiry personally and
+              aim to reply within one business day.
             </p>
           </div>
         </div>
@@ -307,7 +307,7 @@ export default function ContactPage() {
               </h1>
               <p className="text-mute text-[1.12rem] leading-relaxed max-w-[48ch]">
                 Share a few details about your vision and timeline. We review every
-                submission carefully and reply within one business day with honest
+                inquiry personally and aim to reply within one business day with honest
                 advice and next steps.
               </p>
             </div>
@@ -332,7 +332,7 @@ export default function ContactPage() {
                 <div>
                   <h4 className="text-ink font-medium text-sm">Online Inquiries</h4>
                   <p className="text-mute text-sm mt-0.5">
-                    Submissions are routed directly to our studio lead and answered within 24 hours.
+                    Submissions are routed directly to our studio lead, aiming to reply within one business day.
                   </p>
                 </div>
               </div>
@@ -340,9 +340,9 @@ export default function ContactPage() {
               <div className="flex items-start gap-3.5">
                 <Clock className="size-5 text-accent shrink-0 mt-1" />
                 <div>
-                  <h4 className="text-ink font-medium text-sm">Guaranteed Response</h4>
+                  <h4 className="text-ink font-medium text-sm">Personal Review</h4>
                   <p className="text-mute text-sm mt-0.5">
-                    Within 24 business hours. No spam, no sales pressure.
+                    We aim to reply within one business day. No spam, no sales pressure.
                   </p>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Fraunces } from 'next/font/google';
+import { Inter, Fraunces, Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { TopChrome, BottomChrome } from '@/components/ui/SiteChrome';
 import { OrbitalProvider } from '@/context/OrbitalContext';
@@ -15,6 +15,21 @@ const fraunces = Fraunces({
   display: 'swap',
   weight: ['300', '400', '500'],
   variable: '--font-fraunces',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-manrope',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+  weight: ['400', '500'],
+  variable: '--font-mono',
 });
 
 export const metadata: Metadata = {
@@ -58,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
       <body className="bg-bg text-ink min-h-screen flex flex-col selection:bg-accent selection:text-bg">
         <OrbitalProvider>
           {/* Skip to main content for accessibility */}

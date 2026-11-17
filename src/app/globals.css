@@ -7,6 +7,7 @@
   --bg-surface: #0b0d18;
   --bg-subtle: #121526;
   --ink: #eceef4;
+  --bone: #f2efe8;
   --mute: #8e95aa;
   --line: rgba(236, 238, 244, 0.11);
   --gold: #d8c3a0;
@@ -55,6 +56,10 @@ body {
 }
 
 /* Glass UI utility classes */
+.border-hairline {
+  border-color: rgba(236, 238, 244, 0.08);
+}
+
 .glass {
   position: relative;
   background: var(--glass-bg);

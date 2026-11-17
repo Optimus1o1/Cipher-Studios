@@ -23,6 +23,9 @@ export function Footer() {
               </span>
               <span className="font-light">Moon Sanctum Labs</span>
             </Link>
+            <p className="text-accent-copper text-xs uppercase tracking-widest font-mono font-medium">
+              Decode. Build. Evolve.
+            </p>
             <p className="text-mute leading-relaxed">
               Kolkata, India. Working with founders and businesses worldwide.
             </p>
