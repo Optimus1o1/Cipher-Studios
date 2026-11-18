@@ -297,14 +297,14 @@ export const selectedProjects: ProjectBuild[] = [
     metrics: [
       {
         label: 'YIELD',
-        value: '1mm·m²',
-        unit: '= 1 LITRE',
+        value: '1 mm × 1 m²',
+        unit: '= 1 L',
         variant: 'cyan',
       },
       {
-        label: 'E2E VALIDATION',
-        value: '100%',
-        unit: 'CERTIFIED',
+        label: 'MODEL VALIDATION',
+        value: 'SSKM CAMPUS',
+        unit: 'ZERO DIVERGENCE',
         variant: 'emerald',
       },
       {

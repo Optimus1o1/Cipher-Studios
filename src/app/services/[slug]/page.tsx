@@ -2,13 +2,16 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock, UserCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Shield, Terminal, Sparkles } from 'lucide-react';
 import { Section } from '@/components/ui/Section';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/glass/GlassCard';
-import { servicesData, ServiceItem } from '@/data/services';
+import { servicesData } from '@/data/services';
 import { processSteps } from '@/data/process';
 import { SATELLITE_CONFIGS } from '@/data/satellites';
+import { ServiceSpecHUD } from '@/components/services/ServiceSpecHUD';
+import { ServiceDeliverablesList } from '@/components/services/ServiceDeliverablesList';
 
 interface Props {
   params: Promise<{
@@ -55,10 +58,10 @@ export default async function ServiceDetailPage({ params }: Props) {
   return (
     <div className="relative z-20 w-full pt-28 pb-20 pointer-events-auto">
       {/* Top Breadcrumb & Hero */}
-      <div className="max-w-content mx-auto px-6 md:px-8 pt-6 pb-20">
+      <div className="max-w-content mx-auto px-6 md:px-8 pt-6 pb-16">
         <Link
           href="/services"
-          className="relative z-30 inline-flex items-center gap-2 text-mute hover:text-ink text-[0.92rem] mb-6 sm:mb-10 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+          className="relative z-30 inline-flex items-center gap-2 text-mute hover:text-ink text-[0.92rem] mb-6 sm:mb-10 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-copper rounded-sm"
         >
           <ArrowLeft className="size-4" />
           <span>All services</span>
@@ -67,10 +70,10 @@ export default async function ServiceDetailPage({ params }: Props) {
         {/* Dedicated mobile satellite viewing window (above text block) */}
         <div className="h-44 md:hidden pointer-events-none" aria-hidden="true" />
 
-        <div className="max-w-[760px] space-y-6">
+        <div className="max-w-[820px] space-y-6">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-accent text-[0.92rem] uppercase tracking-wider font-medium">
-              Service Scope
+            <span className="text-accent-copper text-[0.92rem] uppercase tracking-wider font-medium">
+              Service Discipline {service.number} / 06
             </span>
             {satellite && (
               <span
@@ -81,8 +84,11 @@ export default async function ServiceDetailPage({ params }: Props) {
                   WebkitBackdropFilter: 'blur(12px)',
                 }}
               >
-                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: satellite.accentColor }} />
-                <span>Orbital Instrument {satellite.number} / 06 • Active</span>
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse"
+                  style={{ background: satellite.accentColor }}
+                />
+                <span>Orbital Instrument {satellite.number} Active</span>
               </span>
             )}
           </div>
@@ -91,26 +97,23 @@ export default async function ServiceDetailPage({ params }: Props) {
             {service.title}
           </h1>
 
-          <p className="text-mute text-[1.12rem] md:text-[1.25rem] leading-relaxed max-w-[50ch]">
+          <p className="font-mono text-sm sm:text-base text-accent-copper/90 uppercase tracking-wide">
+            {service.tagline}
+          </p>
+
+          <p className="text-mute text-[1.12rem] md:text-[1.22rem] leading-relaxed max-w-[56ch]">
             {service.intro}
           </p>
 
-          <div className="pt-4 flex flex-wrap gap-8 text-[0.94rem] border-t border-line">
-            <div>
-              <span className="block font-medium text-accent text-xs uppercase tracking-wider mb-1">
-                Best For
-              </span>
-              <span className="text-ink">{service.bestFor}</span>
-            </div>
-            <div>
-              <span className="block font-medium text-accent text-xs uppercase tracking-wider mb-1">
-                Typical Timeline
-              </span>
-              <span className="text-ink">{service.timeline}</span>
-            </div>
+          {/* Technical Specifications HUD Bar */}
+          <div className="pt-2">
+            <ServiceSpecHUD
+              technicalSpec={service.technicalSpec}
+              timeline={service.timeline}
+            />
           </div>
 
-          <div className="pt-6 flex flex-wrap items-center gap-4">
+          <div className="pt-4 flex flex-wrap items-center gap-4">
             <Button
               href={`/contact?service=${encodeURIComponent(service.title)}`}
               size="lg"
@@ -118,56 +121,117 @@ export default async function ServiceDetailPage({ params }: Props) {
             >
               Discuss this service
             </Button>
-            <Button href="#included" size="lg" variant="secondary">
-              What&apos;s included
+            <Button href="#deliverables" size="lg" variant="secondary">
+              Review deliverables
             </Button>
           </div>
         </div>
       </div>
 
-      {/* What is Included */}
-      <Section id="included" borderTop={true}>
+      {/* Phased Deliverables Section */}
+      <Section id="deliverables" borderTop={true} className="py-16">
         <div className="space-y-10">
-          <div className="space-y-2">
-            <span className="text-accent text-sm uppercase tracking-wider font-medium">
-              Deliverables
-            </span>
-            <h2 className="font-serif text-ink text-[2.2rem] md:text-[2.8rem] font-light">
-              What is included
-            </h2>
-          </div>
+          <SectionHeading
+            tag="Engineering Deliverables"
+            title="Scope, architecture & production handover."
+            lead={`Structured deliverables engineered for ${service.title.toLowerCase()}, from initial architecture to verified production sign-off.`}
+          />
 
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 list-none p-0 m-0">
-            {service.included.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3.5 py-4 border-t border-line text-[1.05rem] text-ink"
-              >
-                <CheckCircle2 className="size-5 text-accent shrink-0 mt-0.5" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          <ServiceDeliverablesList
+            phasedDeliverables={service.phasedDeliverables}
+          />
         </div>
       </Section>
 
-      {/* What You Get / Outcomes */}
-      <Section id="outcomes" borderTop={true}>
+      {/* Technical Specifications & Standards Grid */}
+      <Section id="specs" borderTop={true} className="py-16">
         <div className="space-y-10">
-          <div className="space-y-2">
-            <span className="text-accent text-sm uppercase tracking-wider font-medium">
-              Business Value
-            </span>
-            <h2 className="font-serif text-ink text-[2.2rem] md:text-[2.8rem] font-light">
-              What you get
-            </h2>
+          <SectionHeading
+            tag="Engineering Standards"
+            title="Tooling, quality targets & asset ownership."
+            lead="How we structure our development environment, maintainable dependencies, and client handover terms."
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tooling Card */}
+            <GlassCard tone="dark" className="space-y-4 p-6 sm:p-8">
+              <div className="flex items-center gap-2 text-accent-copper">
+                <Terminal className="size-5" />
+                <span className="font-mono text-xs uppercase tracking-wider font-semibold">
+                  Tooling & Frameworks
+                </span>
+              </div>
+              <p className="text-mute text-xs sm:text-sm leading-relaxed">
+                Capabilities and modern engineering frameworks selected according to project scope:
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {service.technicalSpec.frameworks.map((fw, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 rounded text-xs font-mono bg-white/[0.04] border border-line text-ink"
+                  >
+                    {fw}
+                  </span>
+                ))}
+              </div>
+            </GlassCard>
+
+            {/* Quality Standards Card */}
+            <GlassCard tone="dark" className="space-y-4 p-6 sm:p-8">
+              <div className="flex items-center gap-2 text-accent-copper">
+                <Sparkles className="size-5" />
+                <span className="font-mono text-xs uppercase tracking-wider font-semibold">
+                  Target Standards
+                </span>
+              </div>
+              <p className="text-mute text-xs sm:text-sm leading-relaxed">
+                Measurable engineering and accessibility benchmarks targeted for client engagements:
+              </p>
+              <ul className="space-y-2 pt-2 text-xs font-mono text-[#F2EFE8] list-none p-0 m-0">
+                {service.technicalSpec.standards.map((std, idx) => (
+                  <li key={idx} className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <span>{std}</span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+
+            {/* Ownership & Handover Card */}
+            <GlassCard tone="dark" className="space-y-4 p-6 sm:p-8">
+              <div className="flex items-center gap-2 text-accent-copper">
+                <Shield className="size-5" />
+                <span className="font-mono text-xs uppercase tracking-wider font-semibold">
+                  Client Ownership
+                </span>
+              </div>
+              <p className="text-mute text-xs sm:text-sm leading-relaxed">
+                {service.technicalSpec.ownership}
+              </p>
+              <div className="pt-2 border-t border-line/50 text-[11px] font-mono text-mute">
+                Deployment: {service.technicalSpec.deployment}
+              </div>
+            </GlassCard>
           </div>
+        </div>
+      </Section>
+
+      {/* Business Value / Outcomes Section */}
+      <Section id="outcomes" borderTop={true} className="py-16">
+        <div className="space-y-10">
+          <SectionHeading
+            tag="Business Value"
+            title="Measurable outcomes, zero hand-waving."
+            lead="What changes for your business when this discipline is engineered properly."
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {service.outcomes.map((outcome, i) => (
-              <GlassCard key={i} tone="dark" className="space-y-3">
-                <span className="text-accent font-mono text-sm">Outcome 0{i + 1}</span>
-                <p className="text-ink text-[1.08rem] font-light leading-relaxed">
+              <GlassCard key={i} tone="dark" className="space-y-3 p-6 sm:p-8">
+                <span className="text-accent-copper font-mono text-xs uppercase tracking-wider">
+                  Outcome 0{i + 1}
+                </span>
+                <p className="text-ink text-[1.05rem] font-light leading-relaxed">
                   {outcome}
                 </p>
               </GlassCard>
@@ -176,22 +240,24 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
       </Section>
 
-      {/* How it works */}
-      <Section id="process" borderTop={true}>
+      {/* Methodology / Working Process */}
+      <Section id="process" borderTop={true} className="py-16">
         <div className="space-y-10">
-          <div className="space-y-2">
-            <span className="text-accent text-sm uppercase tracking-wider font-medium">
-              Workflow
-            </span>
-            <h2 className="font-serif text-ink text-[2.2rem] md:text-[2.8rem] font-light">
-              How it works
-            </h2>
-          </div>
+          <SectionHeading
+            tag="Methodology"
+            title="How every engagement operates."
+            lead="A disciplined four-stage engineering sequence ensuring complete alignment and transparency."
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {processSteps.map((step) => (
-              <div key={step.number} className="border-t border-line pt-6 space-y-3">
-                <span className="text-accent font-mono text-sm">0{step.number}</span>
+              <div
+                key={step.number}
+                className="border-t border-line pt-6 space-y-3"
+              >
+                <span className="text-accent-copper font-mono text-xs uppercase tracking-wider font-medium">
+                  0{step.number}
+                </span>
                 <h3 className="font-serif text-ink text-[1.4rem] font-light">
                   {step.title}
                 </h3>
@@ -204,31 +270,28 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
       </Section>
 
-      {/* Questions / FAQs */}
-      <Section id="faq" borderTop={true}>
+      {/* Frequently Asked Questions */}
+      <Section id="faq" borderTop={true} className="py-16">
         <div className="max-w-[850px] space-y-10">
-          <div className="space-y-2">
-            <span className="text-accent text-sm uppercase tracking-wider font-medium">
-              Common Inquiries
-            </span>
-            <h2 className="font-serif text-ink text-[2.2rem] md:text-[2.8rem] font-light">
-              Frequently asked questions
-            </h2>
-          </div>
+          <SectionHeading
+            tag="Transparent Answers"
+            title="Frequently asked questions."
+            lead="Common inquiries regarding scope, revisions, performance targets, and handover."
+          />
 
           <div className="divide-y divide-line border-y border-line">
             {service.faqs.map((faq, i) => (
               <details
                 key={i}
-                className="group py-6 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+                className="group py-6 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-copper rounded-sm"
               >
-                <summary className="list-none flex items-center justify-between gap-4 font-serif text-[1.3rem] md:text-[1.45rem] font-light text-ink hover:text-accent transition-colors">
+                <summary className="list-none flex items-center justify-between gap-4 font-serif text-[1.25rem] md:text-[1.4rem] font-light text-ink hover:text-accent-copper transition-colors">
                   <span>{faq.question}</span>
-                  <span className="text-accent font-sans text-2xl transition-transform duration-200 group-open:rotate-45">
+                  <span className="text-accent-copper font-sans text-xl transition-transform duration-200 group-open:rotate-45">
                     +
                   </span>
                 </summary>
-                <p className="mt-4 text-mute text-[1rem] leading-relaxed max-w-[65ch]">
+                <p className="mt-4 text-mute text-[0.98rem] leading-relaxed max-w-[65ch]">
                   {faq.answer}
                 </p>
               </details>
@@ -242,10 +305,10 @@ export default async function ServiceDetailPage({ params }: Props) {
         <div className="p-6 md:p-8 rounded-card bg-bg-surface border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-1">
             <h3 className="font-serif font-light text-ink text-[1.35rem] md:text-[1.5rem]">
-              Not sure what you need?
+              Not sure which service scope you need?
             </h3>
-            <p className="text-mute text-[0.98rem] leading-relaxed max-w-[50ch]">
-              Send us your website address. We&apos;ll review its speed, search ranking, and conversion flow with three clear fixes.
+            <p className="text-mute text-[0.98rem] leading-relaxed max-w-[52ch]">
+              Send us your website address. We&apos;ll audit its speed, search crawlability, and conversion flow, providing three actionable fixes.
             </p>
           </div>
           <Button
@@ -260,7 +323,7 @@ export default async function ServiceDetailPage({ params }: Props) {
       </div>
 
       {/* Next Service & Bottom CTA Navigation */}
-      <Section borderTop={true} className="bg-veil-deep">
+      <Section borderTop={true} className="bg-veil-deep py-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
           <Button
             href={`/contact?service=${encodeURIComponent(service.title)}`}
@@ -272,17 +335,17 @@ export default async function ServiceDetailPage({ params }: Props) {
 
           <Link
             href={`/services/${nextService.slug}`}
-            className="group flex items-center gap-3 text-right"
+            className="group flex items-center gap-3 text-left sm:text-right focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-copper rounded-sm"
           >
-            <div className="text-left sm:text-right">
-              <span className="block text-xs uppercase tracking-wider text-mute">
-                Next Service
+            <div>
+              <span className="block text-xs font-mono uppercase tracking-wider text-mute">
+                Next Service {nextService.number} / 06
               </span>
-              <span className="font-serif text-[1.4rem] md:text-[1.6rem] font-light text-ink group-hover:text-accent transition-colors">
+              <span className="font-serif text-[1.4rem] md:text-[1.6rem] font-light text-ink group-hover:text-accent-copper transition-colors">
                 {nextService.title}
               </span>
             </div>
-            <div className="size-10 rounded-full border border-line flex items-center justify-center text-mute group-hover:text-ink group-hover:border-accent transition-colors">
+            <div className="size-10 rounded-full border border-line flex items-center justify-center text-mute group-hover:text-ink group-hover:border-accent-copper transition-colors">
               <ArrowRight className="size-4" />
             </div>
           </Link>

@@ -40,6 +40,16 @@ export function OrbitalServicesHero() {
         <div className="w-[340px] h-[340px] md:w-[480px] md:h-[480px] rounded-full border border-white/[0.04] animate-pulse duration-1000" />
       </div>
 
+      {/* Interactive Discovery Indicator (Desktop >= 860px) */}
+      {!selectedSlug && (
+        <div className="hidden md:flex absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-auto items-center justify-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-black/50 backdrop-blur-md text-xs font-mono text-[#F2EFE8]/80 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-copper animate-pulse" />
+            <span>Interactive Orbit — Click any satellite to inspect or explore below</span>
+          </div>
+        </div>
+      )}
+
       {/* When a service is selected, display the Focused Details Panel */}
       {selectedSlug ? (
         <div className="relative z-20 w-full max-w-content mx-auto px-4 md:px-8 py-4 md:py-8 flex items-center justify-start pointer-events-auto">

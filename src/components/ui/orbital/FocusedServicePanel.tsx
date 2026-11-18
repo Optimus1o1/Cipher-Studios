@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, X, Clock, Sparkles } from 'lucide-react';
+import { ArrowRight, X, Clock, Shield, CheckCircle2 } from 'lucide-react';
 import { useOrbital } from '@/context/OrbitalContext';
 import { SATELLITE_CONFIGS } from '@/components/three/satellites/types';
 import { servicesData } from '@/data/services';
@@ -51,29 +51,46 @@ export function FocusedServicePanel() {
         <h2 className="font-serif font-light text-[1.65rem] sm:text-[2rem] md:text-[2.4rem] text-ink leading-tight mb-1.5">
           {config.title}
         </h2>
-        <p className="text-accent text-xs sm:text-sm font-medium tracking-wide mb-3.5">
-          {config.tagline}
+        <p className="text-accent-copper text-xs sm:text-sm font-medium tracking-wide mb-3.5">
+          {serviceDetail?.tagline || config.tagline}
         </p>
 
         {/* Concise Description */}
-        <p className="text-mute text-xs sm:text-sm md:text-[0.95rem] leading-relaxed mb-5">
-          {config.description}
+        <p className="text-mute text-xs sm:text-sm md:text-[0.95rem] leading-relaxed mb-4">
+          {serviceDetail?.intro || config.description}
         </p>
+
+        {/* Key Deliverables Highlights */}
+        {serviceDetail?.keyDeliverables && (
+          <div className="space-y-1.5 mb-5 py-2.5 px-3 rounded-xl bg-white/[0.02] border border-line/40">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-accent-copper font-medium block">
+              Core Deliverables Preview
+            </span>
+            <ul className="space-y-1 text-xs text-ink/90 list-none p-0 m-0">
+              {serviceDetail.keyDeliverables.slice(0, 2).map((deliv, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <CheckCircle2 className="size-3.5 text-accent-copper shrink-0 mt-0.5" />
+                  <span className="truncate">{deliv}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Service Metadata preview */}
         {serviceDetail && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 py-3 px-3.5 rounded-xl bg-white/5 border border-white/8 mb-5 text-xs text-mute">
             <div className="flex items-center gap-2">
-              <Clock className="size-3.5 text-accent shrink-0" />
-              <span>
+              <Clock className="size-3.5 text-accent-copper shrink-0" />
+              <span className="truncate">
                 <strong className="text-ink font-normal">Timeline:</strong>{' '}
                 {serviceDetail.timeline}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Sparkles className="size-3.5 text-accent shrink-0" />
+              <Shield className="size-3.5 text-accent-copper shrink-0" />
               <span className="truncate">
-                <strong className="text-ink font-normal">Ownership:</strong> 100% Client
+                <strong className="text-ink font-normal">Ownership:</strong> Defined in Agreement
               </span>
             </div>
           </div>
@@ -83,7 +100,7 @@ export function FocusedServicePanel() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
           <Link
             href={`/services/${config.slug}`}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-ink text-bg font-medium text-xs sm:text-sm hover:bg-accent transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-accent-copper text-bg font-medium text-xs sm:text-sm hover:brightness-110 transition-all"
           >
             <span>Explore full scope & FAQs</span>
             <ArrowRight className="size-4" />
