@@ -10,6 +10,7 @@ import { GlassCard } from '@/components/ui/glass/GlassCard';
 import { StatCard } from '@/components/ui/glass/StatCard';
 import { LunarTelemetryBadge } from '@/components/ui/LunarTelemetryBadge';
 import { SelectedBuildsSection } from '@/components/portfolio/SelectedBuildsSection';
+import { FounderSection } from '@/components/studio/FounderSection';
 import { servicesData } from '@/data/services';
 import { processSteps } from '@/data/process';
 import { principlesData } from '@/data/principles';
@@ -34,7 +35,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-mute text-[1.12rem] md:text-[1.22rem] leading-relaxed max-w-[54ch]">
-              Moon Sanctum Labs is a small senior studio in Kolkata. We design and
+              Moon Sanctum Labs is an independent engineering studio in Kolkata. We design and
               build fast, beautiful websites for business owners and startups,
               then bring in the search traffic and customers to fill them.
             </p>
@@ -124,6 +125,9 @@ export default function HomePage() {
           ))}
         </div>
       </Section>
+
+      {/* Founder & Studio Practice */}
+      <FounderSection />
 
       {/* Process Section */}
       <Section id="process" borderTop={true} className="pointer-events-auto">

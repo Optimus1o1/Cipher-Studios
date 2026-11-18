@@ -35,11 +35,11 @@ export function Navigation() {
           : 'bg-gradient-to-b from-bg/90 to-transparent'
       )}
     >
-      <div className="max-w-content mx-auto px-6 md:px-8">
+      <div className="w-full max-w-[1400px] mx-auto px-6 md:px-8">
         <nav className="flex items-center justify-between h-[68px] md:h-[72px]" aria-label="Main Navigation">
           <Link
             href="/"
-            className="flex items-center gap-3 font-serif text-[1.18rem] tracking-tight text-ink hover:text-accent transition-colors"
+            className="flex items-center gap-3 font-serif text-[1.18rem] tracking-tight text-ink hover:text-accent transition-colors shrink-0 whitespace-nowrap"
           >
             {/* Elegant Moon Crescent icon */}
             <span
@@ -52,11 +52,11 @@ export function Navigation() {
           </Link>
 
           {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-8 text-[0.93rem]">
+          <div className="hidden xl:flex items-center gap-6 2xl:gap-8 text-[0.93rem] shrink-0">
             <Link
               href="/"
               className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm',
+                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
                 pathname === '/'
                   ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
                   : 'text-mute hover:text-ink'
@@ -68,7 +68,7 @@ export function Navigation() {
             <Link
               href="/services"
               className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm',
+                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
                 pathname === '/services' || pathname.startsWith('/services/')
                   ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
                   : 'text-mute hover:text-ink'
@@ -79,23 +79,29 @@ export function Navigation() {
             </Link>
             <Link
               href="/#work"
-              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap"
             >
               Selected Builds
             </Link>
             <Link
+              href="/#studio"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap"
+            >
+              Studio
+            </Link>
+            <Link
               href="/#process"
-              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap"
             >
               Process
             </Link>
             <Link
               href="/#principles"
-              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap"
             >
               Principles
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
               <Button href="/contact" size="sm" variant="primary">
                 Start a project
               </Button>
@@ -112,7 +118,7 @@ export function Navigation() {
           {/* Mobile hamburger button */}
           <button
             type="button"
-            className="md:hidden p-2 text-ink hover:text-accent rounded-lg border border-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="xl:hidden p-2 text-ink hover:text-accent rounded-lg border border-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
@@ -127,7 +133,7 @@ export function Navigation() {
       {mobileOpen && (
         <div
           id="mobile-navigation"
-          className="md:hidden border-b border-line bg-bg/95 backdrop-blur-xl px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200"
+          className="xl:hidden border-b border-line bg-bg/95 backdrop-blur-xl px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex flex-col space-y-3 text-[1.05rem]">
             <Link
@@ -162,6 +168,13 @@ export function Navigation() {
               className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper"
             >
               Selected Builds
+            </Link>
+            <Link
+              href="/#studio"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper"
+            >
+              Studio
             </Link>
             <Link
               href="/#process"
