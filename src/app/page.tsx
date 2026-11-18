@@ -9,6 +9,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { GlassCard } from '@/components/ui/glass/GlassCard';
 import { StatCard } from '@/components/ui/glass/StatCard';
 import { LunarTelemetryBadge } from '@/components/ui/LunarTelemetryBadge';
+import { SelectedBuildsSection } from '@/components/portfolio/SelectedBuildsSection';
 import { servicesData } from '@/data/services';
 import { processSteps } from '@/data/process';
 import { principlesData } from '@/data/principles';
@@ -90,6 +91,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Selected Studio Builds Band */}
+      <SelectedBuildsSection />
 
       {/* Services Band */}
       <Section id="services" borderTop={true} className="pointer-events-auto">

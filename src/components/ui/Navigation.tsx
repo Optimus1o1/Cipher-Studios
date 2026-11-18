@@ -78,6 +78,12 @@ export function Navigation() {
               Services
             </Link>
             <Link
+              href="/#work"
+              className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
+            >
+              Selected Builds
+            </Link>
+            <Link
               href="/#process"
               className="text-mute hover:text-ink transition-colors duration-200 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm"
             >
@@ -149,6 +155,13 @@ export function Navigation() {
               aria-current={pathname === '/services' || pathname.startsWith('/services/') ? 'page' : undefined}
             >
               Services
+            </Link>
+            <Link
+              href="/#work"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2 text-mute hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper"
+            >
+              Selected Builds
             </Link>
             <Link
               href="/#process"
