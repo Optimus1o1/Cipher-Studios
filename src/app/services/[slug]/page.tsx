@@ -37,9 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${service.title} | Moon Sanctum Labs`,
     description: service.intro,
+    alternates: {
+      canonical: `/services/${slug}`,
+    },
     openGraph: {
       title: `${service.title} — Moon Sanctum Labs`,
       description: service.intro,
+      url: `/services/${slug}`,
     },
   };
 }

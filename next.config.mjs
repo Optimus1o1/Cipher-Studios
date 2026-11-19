@@ -32,6 +32,11 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // Production Enforcing Content Security Policy
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
           // Content Security Policy in Report-Only mode during staging/pre-production
           {
             key: 'Content-Security-Policy-Report-Only',

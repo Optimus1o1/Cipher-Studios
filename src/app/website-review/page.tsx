@@ -25,7 +25,7 @@ const included = [
 
 const steps = [
   { title: 'Send your address', body: 'Fill in the short form below. It takes about a minute.' },
-  { title: 'We review it', body: `A senior person looks at your site and writes up what they find, within ${REVIEW_TURNAROUND}.` },
+  { title: 'We review it', body: `An engineer on our team looks at your site and writes up what they find, within ${REVIEW_TURNAROUND}.` },
   { title: 'You get your review', body: 'It arrives by email, with a call if you would like one. No pressure to buy.' },
 ];
 
@@ -81,7 +81,7 @@ export default function WebsiteReviewPage() {
         <div className="max-w-content mx-auto px-4 sm:px-6 md:px-8 w-full">
           <div className="max-w-[720px] space-y-6 sm:space-y-7">
             <h1 className="font-serif font-light text-ink text-[2.1rem] sm:text-[3.2rem] md:text-[4.2rem] leading-[1.08] tracking-[-0.03em] break-words">
-              A free review of your website, from a senior team.
+              A free review of your website, from our studio team.
             </h1>
             <p className="text-mute text-[1.05rem] sm:text-[1.15rem] leading-relaxed max-w-[52ch]">
               Send us your site address. Within {REVIEW_TURNAROUND} you will get an honest review of its speed, search

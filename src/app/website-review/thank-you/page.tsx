@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 export const metadata: Metadata = {
   title: 'Thank you | Moon Sanctum Labs',
   robots: { index: false, follow: false },
+  alternates: { canonical: '/website-review/thank-you' },
 };
 
 export default function ThankYouPage() {
@@ -22,7 +23,7 @@ export default function ThankYouPage() {
             Thank you. Your request is in.
           </h1>
           <p className="text-mute text-[1.12rem] leading-relaxed">
-            We have sent you a confirmation email. A senior member of our team will review your site and email you what
+            We have sent you a confirmation email. Our engineering team will review your site and email you what
             they find.
           </p>
           <ol className="list-none p-0 m-0 divide-y divide-line border-y border-line text-ink">

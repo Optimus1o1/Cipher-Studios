@@ -10,7 +10,7 @@ export const processSteps: ProcessStep[] = [
     number: 1,
     title: 'Listen',
     description: 'We learn your business, customers and goals, then agree scope, timeline and price in writing.',
-    details: 'Every project starts with a direct conversation with our senior team. We unpack your objectives, identify edge cases, and define clear deliverables before committing.',
+    details: 'Every project starts with a direct conversation with our engineering studio. We unpack your objectives, identify edge cases, and define clear deliverables before committing.',
   },
   {
     number: 2,

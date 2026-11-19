@@ -10,7 +10,10 @@ import { ServicesGrid } from '@/components/ui/orbital/ServicesGrid';
 export const metadata: Metadata = {
   title: 'Services | Moon Sanctum Labs — Digital Engineering & Design',
   description:
-    'Six senior disciplines: Website design, web development, SEO, digital marketing, branding, and care plans. Measurable engineering targets and transparent client handover.',
+    'Six engineering disciplines: Website design, web development, SEO, digital marketing, branding, and care plans. Measurable engineering targets and transparent client handover.',
+  alternates: {
+    canonical: '/services',
+  },
 };
 
 export default function ServicesPage() {

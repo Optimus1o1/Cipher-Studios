@@ -15,7 +15,11 @@ async function testHeaders() {
     headerMap.set(h.key.toLowerCase(), h.value);
   }
 
-  // 1. Content-Security-Policy-Report-Only
+  // 1. Content Security Policy (Enforcing & Report-Only)
+  const enforcingCsp = headerMap.get('content-security-policy');
+  assert.ok(enforcingCsp, 'Enforcing Content-Security-Policy header must be present');
+  assert.ok(enforcingCsp.includes("default-src 'self'"), "Enforcing CSP must include default-src 'self'");
+
   const csp = headerMap.get('content-security-policy-report-only');
   assert.ok(csp, 'Content-Security-Policy-Report-Only header must be present');
   assert.ok(csp.includes("default-src 'self'"), "CSP must include default-src 'self'");

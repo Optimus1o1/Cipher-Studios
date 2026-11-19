@@ -3,6 +3,7 @@ import { Inter, Fraunces, Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { TopChrome, BottomChrome } from '@/components/ui/SiteChrome';
 import { OrbitalProvider } from '@/context/OrbitalContext';
+import { SITE_URL, getRootJsonLdGraph } from '@/data/metadata';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,6 +21,7 @@ const fraunces = Fraunces({
 const manrope = Manrope({
   subsets: ['latin'],
   display: 'swap',
+  preload: false,
   weight: ['400', '500', '600', '700'],
   variable: '--font-manrope',
 });
@@ -35,7 +37,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Moon Sanctum Labs | Web Design, Development, SEO & Growth',
   description:
-    'Moon Sanctum Labs is a senior web design and search studio in Kolkata, India. We design, build and scale fast, beautiful websites for business owners and founders worldwide.',
+    'Moon Sanctum Labs is an independent web engineering and design studio in Kolkata, India. We design, build and scale fast, beautiful websites for business owners and startups worldwide.',
   keywords: [
     'web design',
     'web development',
@@ -46,18 +48,21 @@ export const metadata: Metadata = {
     'Moon Sanctum Labs',
   ],
   authors: [{ name: 'Moon Sanctum Labs' }],
-  metadataBase: new URL('https://moonsanctumlabs.design'),
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Moon Sanctum Labs — Decode. Build. Evolve.',
     description:
-      'Websites that make your business easy to find and hard to forget. Senior web design, development and search growth.',
+      'Websites that make your business easy to find and hard to forget. Independent web design, development and search growth.',
     siteName: 'Moon Sanctum Labs',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Moon Sanctum Labs | Senior Web Studio',
+    title: 'Moon Sanctum Labs | Independent Web Engineering Studio',
     description:
       'Websites that make your business easy to find and hard to forget.',
   },
@@ -74,6 +79,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <script type="application/ld+json">
+          {JSON.stringify(getRootJsonLdGraph())}
+        </script>
+      </head>
       <body className="bg-bg text-ink min-h-screen flex flex-col selection:bg-accent selection:text-bg">
         <OrbitalProvider>
           {/* Skip to main content for accessibility */}
