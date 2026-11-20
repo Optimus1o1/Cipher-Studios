@@ -29,9 +29,15 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 84px;
+  scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
   background-color: var(--bg);
   color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 80px;
+  }
 }
 
 body {

@@ -20,7 +20,7 @@ export function Section({
   return (
     <Component
       className={cn(
-        'relative py-20 md:py-32',
+        'relative py-12 sm:py-16 md:py-24',
         veil && 'bg-veil backdrop-blur-[2px]',
         borderTop && 'border-t border-line',
         className
@@ -28,7 +28,7 @@ export function Section({
       {...props}
     >
       {container ? (
-        <div className="max-w-content mx-auto px-6 md:px-8 w-full relative z-10">
+        <div className="max-w-content mx-auto px-5 sm:px-6 md:px-8 w-full relative z-10">
           {children}
         </div>
       ) : (

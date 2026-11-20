@@ -63,95 +63,6 @@ export interface ProjectBuild {
 
 export const selectedProjects: ProjectBuild[] = [
   {
-    id: 'privguard-ai',
-    slug: 'privguard-ai',
-    title: 'Privguard AI',
-    tagline: 'Autonomous AI Privacy & Security Gateway',
-    classification: {
-      label: 'FLAGSHIP STUDIO BUILD · AI SECURITY INFRASTRUCTURE',
-      variant: 'studio',
-    },
-    summary:
-      'An independent security and privacy enforcement layer positioned between client applications, untrusted data sources, foundation models, and autonomous agent tools.',
-    provenance: {
-      commit: 'e6880ff',
-      status: 'QUALIFIED',
-      repoUrl:
-        'https://github.com/Optimus1o1/RIVA-AI-Intelligent-AI-Security-Privacy-Infrastructure.git',
-    },
-    capabilities: [
-      {
-        title: 'Reversible PII Minimization',
-        description:
-          'Scans prompts and redacts 14 personal identifiable entity types with ephemeral cryptographic placeholders (<EMAIL_1>), restoring them on response without storing plaintext.',
-      },
-      {
-        title: 'Prompt Injection Defense',
-        description:
-          'Deterministic heuristic filtering and untrusted context boundary sanitization containing adversarial prompt extraction and distribution drift.',
-      },
-      {
-        title: 'MCP 2026 Security Gateway',
-        description:
-          'Zero-trust enforcement mediating autonomous AI agent tool execution, destination SSRF validation, and stdio execution sandboxing.',
-      },
-      {
-        title: 'Encrypted Personal Memory Vault',
-        description:
-          'User-controlled personal memory protected by AES-256-GCM envelope encryption, staged human consent proposals, and irreversible cryptographic erasure.',
-      },
-    ],
-    metrics: [
-      {
-        label: 'TESTS',
-        value: '406',
-        unit: 'PASSING',
-        variant: 'emerald',
-      },
-      {
-        label: 'APP ROUTES',
-        value: '32',
-        unit: 'APP',
-        variant: 'copper',
-      },
-      {
-        label: 'DATA STORAGE',
-        value: 'ZERO',
-        unit: 'PLAINTEXT',
-        variant: 'default',
-      },
-    ],
-    techStack: [
-      'Python 3.12',
-      'FastAPI',
-      'Next.js 16',
-      'TypeScript',
-      'PostgreSQL RLS',
-      'Redis 7',
-      'Docker Compose',
-    ],
-    assets: {
-      desktop: {
-        type: 'local-qualified-build',
-        src: '/images/projects/privguard_overview_desktop.png',
-        alt: 'PRIVGUARD AI Local Qualified Build — Telemetry Dashboard and Policy Overview',
-        caption: 'Application Screenshot · Local Qualified Build (Commit: e6880ff)',
-        sourceCommit: 'e6880ff',
-        capturedAt: '2026-11-17',
-        viewport: '1440x900',
-      },
-      mobile: {
-        type: 'local-qualified-build',
-        src: '/images/projects/privguard_overview_mobile.png',
-        alt: 'PRIVGUARD AI Local Qualified Build — Mobile Overview Dashboard',
-        caption: 'Application Screenshot · Mobile View (390px)',
-        sourceCommit: 'e6880ff',
-        capturedAt: '2026-11-17',
-        viewport: '390x844',
-      },
-    },
-  },
-  {
     id: 'fireline',
     slug: 'fireline',
     title: 'Fireline',
@@ -161,7 +72,7 @@ export const selectedProjects: ProjectBuild[] = [
       variant: 'space',
     },
     summary:
-      'Microgravity combustion research decision-support platform engineered for the NASA Space Apps Challenge 2026 (Flame in Freefall), linking primary NASA Physical Sciences Informatics (PSI) flight records to human spaceflight safety.',
+      'An evidence-first research platform connecting NASA microgravity combustion findings to spacecraft fire-safety questions, clearly distinguishing supported, inferred, and unknown evidence.',
     provenance: {
       commit: 'd018b6b',
       status: 'LIVE',
@@ -244,6 +155,95 @@ export const selectedProjects: ProjectBuild[] = [
     },
   },
   {
+    id: 'privguard-ai',
+    slug: 'privguard-ai',
+    title: 'Privguard AI',
+    tagline: 'Autonomous AI Privacy & Security Gateway',
+    classification: {
+      label: 'FLAGSHIP STUDIO BUILD · AI SECURITY INFRASTRUCTURE',
+      variant: 'studio',
+    },
+    summary:
+      'An AI security gateway that detects and redacts sensitive data, protects model interactions, and governs AI-agent tool access before information is exposed.',
+    provenance: {
+      commit: 'e6880ff',
+      status: 'QUALIFIED',
+      repoUrl:
+        'https://github.com/Optimus1o1/RIVA-AI-Intelligent-AI-Security-Privacy-Infrastructure.git',
+    },
+    capabilities: [
+      {
+        title: 'Reversible PII Minimization',
+        description:
+          'Scans prompts and redacts 14 personal identifiable entity types with ephemeral cryptographic placeholders (<EMAIL_1>), restoring them on response without storing plaintext.',
+      },
+      {
+        title: 'Prompt Injection Defense',
+        description:
+          'Deterministic heuristic filtering and untrusted context boundary sanitization containing adversarial prompt extraction and distribution drift.',
+      },
+      {
+        title: 'MCP 2026 Security Gateway',
+        description:
+          'Zero-trust enforcement mediating autonomous AI agent tool execution, destination SSRF validation, and stdio execution sandboxing.',
+      },
+      {
+        title: 'Encrypted Personal Memory Vault',
+        description:
+          'User-controlled personal memory protected by AES-256-GCM envelope encryption, staged human consent proposals, and irreversible cryptographic erasure.',
+      },
+    ],
+    metrics: [
+      {
+        label: 'TESTS',
+        value: '406',
+        unit: 'PASSING',
+        variant: 'emerald',
+      },
+      {
+        label: 'APP ROUTES',
+        value: '32',
+        unit: 'APP',
+        variant: 'copper',
+      },
+      {
+        label: 'DATA STORAGE',
+        value: 'ZERO',
+        unit: 'PLAINTEXT',
+        variant: 'default',
+      },
+    ],
+    techStack: [
+      'Python 3.12',
+      'FastAPI',
+      'Next.js 16',
+      'TypeScript',
+      'PostgreSQL RLS',
+      'Redis 7',
+      'Docker Compose',
+    ],
+    assets: {
+      desktop: {
+        type: 'local-qualified-build',
+        src: '/images/projects/privguard_overview_desktop.png',
+        alt: 'PRIVGUARD AI Local Qualified Build — Telemetry Dashboard and Policy Overview',
+        caption: 'Application Screenshot · Local Qualified Build (Commit: e6880ff)',
+        sourceCommit: 'e6880ff',
+        capturedAt: '2026-11-17',
+        viewport: '1440x900',
+      },
+      mobile: {
+        type: 'local-qualified-build',
+        src: '/images/projects/privguard_overview_mobile.png',
+        alt: 'PRIVGUARD AI Local Qualified Build — Mobile Overview Dashboard',
+        caption: 'Application Screenshot · Mobile View (390px)',
+        sourceCommit: 'e6880ff',
+        capturedAt: '2026-11-17',
+        viewport: '390x844',
+      },
+    },
+  },
+  {
     id: 'jalnetra',
     slug: 'jalnetra',
     title: 'Jalnetra',
@@ -253,7 +253,7 @@ export const selectedProjects: ProjectBuild[] = [
       variant: 'research',
     },
     summary:
-      'High-resolution hydrological digital twin transforming monsoon stormwater liabilities into distributed circular water assets for the Kolkata Metropolitan Basin.',
+      'An urban rainwater intelligence platform mapping opportunities for rainwater capture, storage, reuse, and groundwater recharge while supporting flood resilience.',
     provenance: {
       commit: '3cc89f8',
       status: 'LIVE',

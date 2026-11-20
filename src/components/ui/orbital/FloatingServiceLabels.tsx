@@ -139,11 +139,9 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
     };
 
     updateNoGoZones();
-    const timer = setInterval(updateNoGoZones, 400);
     window.addEventListener('resize', updateNoGoZones, { passive: true });
     window.addEventListener('scroll', updateNoGoZones, { passive: true });
     return () => {
-      clearInterval(timer);
       window.removeEventListener('resize', updateNoGoZones);
       window.removeEventListener('scroll', updateNoGoZones);
     };
@@ -157,6 +155,19 @@ export function FloatingServiceLabels({ heroRef }: FloatingServiceLabelsProps) {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       const isNarrow = viewportWidth < 900;
+
+      // On narrow mobile viewports (< 900px), floating labels are only displayed when a satellite is actively targeted.
+      // If none is targeted, skip 60fps layout reads and calculations entirely to protect mobile main thread.
+      if (isNarrow && !hoveredSlug && !selectedSlug) {
+        for (const config of SATELLITE_CONFIGS) {
+          const el = labelRefs.current[config.slug];
+          if (el) el.style.opacity = '0';
+          const line = lineRefs.current[config.slug];
+          if (line) line.style.opacity = '0';
+        }
+        return;
+      }
+
       const isHeroVisible = isHeroVisibleRef.current;
       const noGoZones = noGoZonesRef.current;
 
