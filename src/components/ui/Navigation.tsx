@@ -1,16 +1,102 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 import { Menu, X } from 'lucide-react';
 
+const HOMEPAGE_SECTIONS = ['hero', 'work', 'services', 'studio', 'process', 'principles'] as const;
+type SectionKey = 'home' | 'work' | 'services' | 'studio' | 'process' | 'principles' | 'contact' | 'review';
+
+interface NavItem {
+  key: SectionKey;
+  label: string;
+  href: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { key: 'home', label: 'Home', href: '/' },
+  { key: 'work', label: 'Selected Builds', href: '/#work' },
+  { key: 'services', label: 'Services', href: '/services' },
+  { key: 'studio', label: 'Studio', href: '/#studio' },
+  { key: 'process', label: 'Process', href: '/#process' },
+  { key: 'principles', label: 'Principles', href: '/#principles' },
+];
+
+const SCROLL_CANCEL_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+  ' ',
+]);
+
+function resolveSectionFromHash(hash: string): SectionKey | null {
+  const clean = hash.replace(/^#/, '').toLowerCase();
+  if (clean === 'hero') return 'home';
+  if (
+    clean === 'work' ||
+    clean === 'services' ||
+    clean === 'studio' ||
+    clean === 'process' ||
+    clean === 'principles'
+  ) {
+    return clean;
+  }
+  return null;
+}
+
+function getScrollGeometry() {
+  const headerOffset = window.innerWidth >= 768 ? 80 : 72;
+  const focalLine = Math.max(headerOffset + 48, Math.min(window.innerHeight * 0.4, 340));
+  const isAtBottom =
+    window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 24;
+  return { headerOffset, focalLine, isAtBottom };
+}
+
+function computeSectionAtViewport(): SectionKey {
+  if (window.scrollY <= 20) {
+    return 'home';
+  }
+  const { focalLine, isAtBottom } = getScrollGeometry();
+  if (isAtBottom) {
+    return 'principles';
+  }
+  let current: SectionKey = 'home';
+  for (const id of HOMEPAGE_SECTIONS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.top <= focalLine) {
+      current = id === 'hero' ? 'home' : id;
+    }
+  }
+  return current;
+}
+
+function hasArrivedAtSection(target: SectionKey): boolean {
+  if (target === 'home') {
+    return window.scrollY <= 24;
+  }
+  const el = document.getElementById(target);
+  if (!el) return true;
+  const rect = el.getBoundingClientRect();
+  const { headerOffset, focalLine, isAtBottom } = getScrollGeometry();
+  if (isAtBottom && rect.top < window.innerHeight && rect.bottom > headerOffset) {
+    return true;
+  }
+  return rect.top >= -40 && rect.top <= focalLine;
+}
+
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('home');
+  const [activeSection, setActiveSection] = useState<SectionKey>('home');
+  const navTargetRef = useRef<SectionKey | null>(null);
   const pathname = usePathname();
 
   // Scroll depth tracking for header background styling
@@ -40,57 +126,50 @@ export function Navigation() {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Section Tracking via IntersectionObserver on homepage
+  // Unified section tracking across click navigation, smooth scroll, manual scroll, hashchange, and popstate
   useEffect(() => {
     if (pathname === '/services' || pathname.startsWith('/services/')) {
+      navTargetRef.current = null;
       setActiveSection('services');
       return;
     }
     if (pathname === '/contact') {
+      navTargetRef.current = null;
       setActiveSection('contact');
       return;
     }
-    if (pathname === '/website-review') {
+    if (pathname.startsWith('/website-review')) {
+      navTargetRef.current = null;
       setActiveSection('review');
       return;
     }
 
     if (pathname !== '/') return;
 
-    // Set initial section from hash if present
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const hash = window.location.hash.replace('#', '');
-      if (['work', 'studio', 'process', 'principles', 'services'].includes(hash)) {
-        setActiveSection(hash);
-      }
+    // Preserve target from hash during initial route transition / direct hash navigation
+    const initialHashTarget =
+      typeof window !== 'undefined' ? resolveSectionFromHash(window.location.hash) : null;
+    if (initialHashTarget) {
+      navTargetRef.current = initialHashTarget;
+      setActiveSection(initialHashTarget);
+    } else {
+      navTargetRef.current = null;
+      setActiveSection(computeSectionAtViewport());
     }
 
-    const sectionIds = ['hero', 'work', 'services', 'studio', 'process', 'principles'];
     let ticking = false;
 
     const updateActiveSection = () => {
-      // If user has scrolled near the bottom of the page, activate the final section
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
-        setActiveSection('principles');
-        ticking = false;
+      ticking = false;
+      const pendingTarget = navTargetRef.current;
+      if (pendingTarget) {
+        if (hasArrivedAtSection(pendingTarget)) {
+          navTargetRef.current = null;
+          setActiveSection(pendingTarget);
+        }
         return;
       }
-
-      // Responsive focal threshold: section is active when its top enters within upper 40% of viewport
-      const threshold = Math.min(window.innerHeight * 0.45, 360);
-      let current = 'home';
-
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= threshold) {
-            current = id === 'hero' ? 'home' : id;
-          }
-        }
-      }
-      setActiveSection(current);
-      ticking = false;
+      setActiveSection(computeSectionAtViewport());
     };
 
     const handleScrollSpy = () => {
@@ -100,30 +179,120 @@ export function Navigation() {
       }
     };
 
-    window.addEventListener('scroll', handleScrollSpy, { passive: true });
-    updateActiveSection();
+    const handleScrollEnd = () => {
+      const pendingTarget = navTargetRef.current;
+      if (pendingTarget) {
+        navTargetRef.current = null;
+        if (hasArrivedAtSection(pendingTarget)) {
+          setActiveSection(pendingTarget);
+          return;
+        }
+      }
+      setActiveSection(computeSectionAtViewport());
+    };
 
-    const handleHashChange = () => {
-      const h = window.location.hash.replace('#', '');
-      if (h) {
-        setActiveSection(h === 'hero' ? 'home' : h);
+    const cancelProgrammaticLock = () => {
+      if (navTargetRef.current) {
+        navTargetRef.current = null;
+        setActiveSection(computeSectionAtViewport());
       }
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (SCROLL_CANCEL_KEYS.has(e.key)) {
+        cancelProgrammaticLock();
+      }
+    };
+
+    const syncFromLocation = (alignScroll: boolean) => {
+      const nextTarget = resolveSectionFromHash(window.location.hash);
+      if (nextTarget) {
+        navTargetRef.current = nextTarget;
+        setActiveSection(nextTarget);
+        if (alignScroll) {
+          const el = document.getElementById(nextTarget);
+          if (el && !hasArrivedAtSection(nextTarget)) {
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+          }
+        }
+      } else {
+        navTargetRef.current = null;
+        setActiveSection(computeSectionAtViewport());
+      }
+    };
+
+    const handleHashChange = () => {
+      setMobileOpen(false);
+      syncFromLocation(false);
+    };
+
+    const handlePopState = () => {
+      setMobileOpen(false);
+      window.requestAnimationFrame(() => {
+        if (window.location.pathname === '/') {
+          syncFromLocation(true);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScrollSpy, { passive: true });
+    window.addEventListener('resize', handleScrollSpy, { passive: true });
+    window.addEventListener('scrollend', handleScrollEnd, { passive: true });
+    window.addEventListener('wheel', cancelProgrammaticLock, { passive: true });
+    window.addEventListener('touchstart', cancelProgrammaticLock, { passive: true });
+    window.addEventListener('keydown', handleKeyDown, { passive: true });
     window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handlePopState);
 
     return () => {
       window.removeEventListener('scroll', handleScrollSpy);
+      window.removeEventListener('resize', handleScrollSpy);
+      window.removeEventListener('scrollend', handleScrollEnd);
+      window.removeEventListener('wheel', cancelProgrammaticLock);
+      window.removeEventListener('touchstart', cancelProgrammaticLock);
+      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handlePopState);
     };
   }, [pathname]);
 
   const handleNavClick = useCallback(
-    (targetSection: string) => {
-      setActiveSection(targetSection);
+    (targetSection: SectionKey) => {
       setMobileOpen(false);
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+      }
+
+      if (targetSection === 'services') {
+        navTargetRef.current = null;
+        setActiveSection('services');
+        return;
+      }
+
+      navTargetRef.current = targetSection;
+      setActiveSection(targetSection);
+
+      if (pathname === '/' && typeof window !== 'undefined') {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const behavior: ScrollBehavior = reduced ? 'auto' : 'smooth';
+        if (targetSection === 'home') {
+          if (window.scrollY > 0 && window.location.hash === '') {
+            window.scrollTo({ top: 0, behavior });
+          }
+        } else if (window.location.hash === `#${targetSection}`) {
+          const el = document.getElementById(targetSection);
+          if (el) {
+            el.scrollIntoView({ behavior });
+          }
+        }
+      }
     },
-    []
+    [pathname]
   );
+
+  const isNavItemActive = (key: SectionKey) =>
+    activeSection === key && (key !== 'home' || pathname === '/');
 
   return (
     <header
@@ -153,84 +322,25 @@ export function Navigation() {
 
           {/* Desktop nav links */}
           <div className="hidden xl:flex items-center gap-6 2xl:gap-8 text-[0.93rem] shrink-0">
-            <Link
-              href="/"
-              onClick={() => handleNavClick('home')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'home' && pathname === '/'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'home' && pathname === '/' ? 'page' : undefined}
-            >
-              Home
-            </Link>
-            <Link
-              href="/#work"
-              onClick={() => handleNavClick('work')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'work'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'work' ? 'page' : undefined}
-            >
-              Selected Builds
-            </Link>
-            <Link
-              href="/services"
-              onClick={() => handleNavClick('services')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'services'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'services' ? 'page' : undefined}
-            >
-              Services
-            </Link>
-            <Link
-              href="/#studio"
-              onClick={() => handleNavClick('studio')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'studio'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'studio' ? 'page' : undefined}
-            >
-              Studio
-            </Link>
-            <Link
-              href="/#process"
-              onClick={() => handleNavClick('process')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'process'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'process' ? 'page' : undefined}
-            >
-              Process
-            </Link>
-            <Link
-              href="/#principles"
-              onClick={() => handleNavClick('principles')}
-              className={cn(
-                'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
-                activeSection === 'principles'
-                  ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'principles' ? 'page' : undefined}
-            >
-              Principles
-            </Link>
+            {NAV_ITEMS.map((item) => {
+              const active = isNavItemActive(item.key);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => handleNavClick(item.key)}
+                  className={cn(
+                    'relative py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper rounded-sm shrink-0 whitespace-nowrap',
+                    active
+                      ? 'text-ink font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent-copper after:rounded-full after:shadow-[0_0_8px_rgba(224,164,92,0.6)]'
+                      : 'text-mute hover:text-ink'
+                  )}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
               <Button href="/contact" size="sm" variant="primary">
                 Start a project
@@ -266,84 +376,25 @@ export function Navigation() {
           className="xl:hidden border-b border-line bg-bg/95 backdrop-blur-xl px-5 sm:px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex flex-col space-y-2 text-[1.05rem]">
-            <Link
-              href="/"
-              onClick={() => handleNavClick('home')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'home' && pathname === '/'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'home' && pathname === '/' ? 'page' : undefined}
-            >
-              Home
-            </Link>
-            <Link
-              href="/#work"
-              onClick={() => handleNavClick('work')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'work'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'work' ? 'page' : undefined}
-            >
-              Selected Builds
-            </Link>
-            <Link
-              href="/services"
-              onClick={() => handleNavClick('services')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'services'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'services' ? 'page' : undefined}
-            >
-              Services
-            </Link>
-            <Link
-              href="/#studio"
-              onClick={() => handleNavClick('studio')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'studio'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'studio' ? 'page' : undefined}
-            >
-              Studio
-            </Link>
-            <Link
-              href="/#process"
-              onClick={() => handleNavClick('process')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'process'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'process' ? 'page' : undefined}
-            >
-              Process
-            </Link>
-            <Link
-              href="/#principles"
-              onClick={() => handleNavClick('principles')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
-                activeSection === 'principles'
-                  ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
-                  : 'text-mute hover:text-ink'
-              )}
-              aria-current={activeSection === 'principles' ? 'page' : undefined}
-            >
-              Principles
-            </Link>
+            {NAV_ITEMS.map((item) => {
+              const active = isNavItemActive(item.key);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => handleNavClick(item.key)}
+                  className={cn(
+                    'px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-copper',
+                    active
+                      ? 'text-ink font-semibold bg-white/5 border-l-2 border-accent-copper'
+                      : 'text-mute hover:text-ink'
+                  )}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             <div className="pt-3 flex flex-col gap-2.5">
               <Button href="/contact" variant="primary" className="w-full justify-center" onClick={() => setMobileOpen(false)}>
                 Start a project
